@@ -8,7 +8,7 @@ from flask import (Flask, request, redirect, url_for,
                    render_template, jsonify, session, send_from_directory)
 from processor import process_files
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.')
 app.secret_key = os.environ.get('SECRET_KEY', 'change-me-in-production')
 
 # Where to store processed data (Railway Volume mounts to /data)
