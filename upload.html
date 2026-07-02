@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sumwon Studios — Upload Data</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  background:#F3F2EF;color:#0C0C0E;font-size:13px;min-height:100vh;
+  display:flex;flex-direction:column}
+.nav{background:#0C0C0E;height:54px;display:flex;align-items:center;padding:0 24px;
+  justify-content:space-between}
+.nav-brand{display:flex;flex-direction:column;gap:2px}
+.nav-eye{font-size:8px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:#555}
+.nav-title{font-size:13px;font-weight:600;color:#fff}
+.nav-link{font-size:11px;color:#666;text-decoration:none}
+.nav-link:hover{color:#fff}
+.wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+.card{background:#fff;border:0.5px solid #D9D8D2;border-radius:12px;
+  padding:36px 40px;width:100%;max-width:560px}
+.card-title{font-size:17px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
+.card-sub{font-size:12px;color:#8C8A86;margin-bottom:28px;line-height:1.6}
+.alert{padding:10px 14px;border-radius:6px;font-size:12px;margin-bottom:18px;font-weight:500}
+.alert-error{background:#FAEAEA;color:#A82222;border:1px solid #F0B4B4}
+.alert-success{background:#EAF5EE;color:#1A6635;border:1px solid #A8D5B8}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:10px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:#8C8A86;margin-bottom:6px}
+.field input[type=password]{width:100%;padding:9px 12px;border:1px solid #D9D8D2;
+  border-radius:6px;font-size:13px;font-family:inherit;outline:none}
+.field input[type=password]:focus{border-color:#1352A2;box-shadow:0 0 0 3px rgba(19,82,162,.1)}
+.files-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.file-slot{border:1.5px dashed #D9D8D2;border-radius:8px;padding:14px 12px;
+  cursor:pointer;transition:border-color .15s,background .15s;position:relative}
+.file-slot:hover{border-color:#1352A2;background:#F0F4FD}
+.file-slot.has-file{border-color:#1A6635;border-style:solid;background:#EAF5EE}
+.file-slot input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.fs-icon{font-size:18px;margin-bottom:6px}
+.fs-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:#52514E;margin-bottom:3px}
+.fs-sub{font-size:10px;color:#8C8A86}
+.fs-name{font-size:10px;color:#1A6635;font-weight:500;margin-top:4px;word-break:break-all}
+.btn-submit{width:100%;padding:12px;background:#0C0C0E;color:#fff;border:none;
+  border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;
+  transition:background .15s}
+.btn-submit:hover{background:#333}
+.btn-submit:disabled{background:#ccc;cursor:not-allowed}
+.divider{border:none;border-top:1px solid #ECEAE5;margin:24px 0}
+.dashboard-link{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;background:#F3F2EF;border-radius:7px;text-decoration:none;color:#0C0C0E;
+  font-weight:500;font-size:12px;border:1px solid #D9D8D2}
+.dashboard-link:hover{background:#ECEAE5}
+.badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:4px;
+  background:#EAF5EE;color:#1A6635}
+.instructions{margin-top:24px;padding:16px;background:#FAFAF8;border-radius:7px;
+  border:1px solid #ECEAE5}
+.instructions h4{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:#8C8A86;margin-bottom:10px}
+.instructions ol{padding-left:16px;color:#52514E;font-size:11px;line-height:2}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="nav-eye">Sumwon Studios</span>
+    <span class="nav-title">Performance Dashboard</span>
+  </div>
+  {% if has_data %}
+  <a href="/dashboard" class="nav-link">View Dashboard &rarr;</a>
+  {% endif %}
+</nav>
+
+<div class="wrap">
+  <div class="card">
+    <div class="card-title">Upload Weekly Data</div>
+    <div class="card-sub">Upload your 4 BigQuery export files to refresh the dashboard. Takes about 5 seconds to process.</div>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success">{{ success }} <a href="/dashboard" style="color:inherit;font-weight:600">View dashboard &rarr;</a></div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" id="upload-form">
+
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Enter upload password" required>
+      </div>
+
+      <div class="files-grid" id="files-grid">
+        <div class="file-slot" id="slot-table2">
+          <input type="file" name="table2" accept=".csv,.txt" onchange="fileChosen(this,'slot-table2')">
+          <div class="fs-icon">📊</div>
+          <div class="fs-label">SHEIN Revenue</div>
+          <div class="fs-sub">Weekly_Trade_Table_2.csv</div>
+          <div class="fs-name" id="name-table2"></div>
+        </div>
+        <div class="file-slot" id="slot-table1">
+          <input type="file" name="table1" accept=".csv,.txt" onchange="fileChosen(this,'slot-table1')">
+          <div class="fs-icon">📦</div>
+          <div class="fs-label">Inventory</div>
+          <div class="fs-sub">Weekly_Trade_Table_1.csv</div>
+          <div class="fs-name" id="name-table1"></div>
+        </div>
+        <div class="file-slot" id="slot-cohort">
+          <input type="file" name="cohort" accept=".csv,.txt" onchange="fileChosen(this,'slot-cohort')">
+          <div class="fs-icon">🎯</div>
+          <div class="fs-label">Hit Rate Cohort</div>
+          <div class="fs-sub">Weekly_Trade_2-31_Cohort.csv</div>
+          <div class="fs-name" id="name-cohort"></div>
+        </div>
+        <div class="file-slot" id="slot-webshop">
+          <input type="file" name="webshop" accept=".csv,.txt" onchange="fileChosen(this,'slot-webshop')">
+          <div class="fs-icon">🛍️</div>
+          <div class="fs-label">Webshop Data</div>
+          <div class="fs-sub">Webshop_per_Site_per_Week.csv</div>
+          <div class="fs-name" id="name-webshop"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submit-btn">Upload &amp; Refresh Dashboard</button>
+    </form>
+
+    {% if has_data %}
+    <div class="divider"></div>
+    <a href="/dashboard" class="dashboard-link">
+      <span>View current dashboard</span>
+      <span class="badge">Live</span>
+    </a>
+    {% endif %}
+
+    <div class="instructions">
+      <h4>How to export from BigQuery</h4>
+      <ol>
+        <li>Open BigQuery Console</li>
+        <li>Run your weekly report queries</li>
+        <li>Click <strong>Save Results</strong> &rarr; <strong>CSV</strong> for each table</li>
+        <li>Upload all 4 files here every Monday</li>
+        <li>Dashboard updates instantly — share the link with the CEO</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script>
+function fileChosen(input, slotId) {
+  var slot = document.getElementById(slotId);
+  var nameEl = document.getElementById('name-' + slotId.replace('slot-',''));
+  if (input.files && input.files[0]) {
+    slot.classList.add('has-file');
+    nameEl.textContent = input.files[0].name;
+  }
+}
+document.getElementById('upload-form').addEventListener('submit', function() {
+  var btn = document.getElementById('submit-btn');
+  btn.textContent = 'Processing...';
+  btn.disabled = true;
+});
+</script>
+</body>
+</html>
