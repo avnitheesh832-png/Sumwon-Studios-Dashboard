@@ -12,7 +12,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'change-me-in-production')
 
 # Where to store processed data (Railway Volume mounts to /data)
-DATA_DIR  = os.environ.get('DATA_DIR', '/data')
+DATA_DIR  = os.environ.get('DATA_DIR', '/tmp/sumwon_data')
 DATA_FILE = os.path.join(DATA_DIR, 'dashboard_data.json')
 UPLOAD_PASSWORD = os.environ.get('UPLOAD_PASSWORD', 'sumwon2026')
 
