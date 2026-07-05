@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sumwon Studios - Performance Dashboard</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0C0C0E;--bg:#F3F2EF;--card:#FFFFFF;
+  --border:#D9D8D2;--borderl:#ECEAE5;--text:#0C0C0E;--text2:#52514E;--text3:#8C8A86;
+  --up:#1A6635;--upbg:#EAF5EE;--dn:#A82222;--dnbg:#FAEAEA;
+  --amber:#A05E0A;--amberbg:#FEF2DF;--accent:#1352A2;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);color:var(--text);font-size:12px;line-height:1.45;min-height:100vh}
+.nav{position:sticky;top:0;z-index:100;background:var(--black);height:54px;
+  display:flex;align-items:center;padding:0 22px;border-bottom:1px solid rgba(255,255,255,.06)}
+.nb{display:flex;flex-direction:column;gap:2px;margin-right:24px;flex-shrink:0}
+.ne{font-size:8px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:#555}
+.nt{font-size:13px;font-weight:600;color:#fff;letter-spacing:-.01em}
+.vtabs{display:flex;gap:2px;background:rgba(255,255,255,.07);border-radius:6px;padding:3px;margin-right:12px}
+.vtab{font-size:11px;font-weight:500;color:rgba(255,255,255,.45);padding:5px 14px;border-radius:4px;
+  cursor:pointer;border:none;background:none;transition:all .15s;white-space:nowrap;font-family:inherit}
+.vtab.active{background:#fff;color:var(--black)}
+.vtab:hover:not(.active){color:rgba(255,255,255,.8)}
+.nsp{flex:1}
+.nbtn{font-size:11px;font-weight:500;padding:6px 15px;border-radius:5px;cursor:pointer;
+  border:none;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-pdf{background:#fff;color:var(--black);margin-right:8px}
+.btn-pdf:hover{background:#eee}
+.btn-send{background:var(--accent);color:#fff}
+.btn-send:hover{background:#1a6ccc}
+.fbar{background:#fff;border-bottom:1px solid var(--border);padding:0 22px;height:48px;
+  display:flex;align-items:center;gap:12px}
+.fl{font-size:9.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--text3);white-space:nowrap;flex-shrink:0}
+.fdrop{font-size:11px;font-weight:500;color:var(--text);background:var(--bg);
+  border:1px solid var(--border);padding:5px 28px 5px 9px;border-radius:5px;
+  cursor:pointer;font-family:inherit;appearance:none;flex-shrink:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%238C8A86'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center}
+.fdiv{width:1px;height:18px;background:var(--border);flex-shrink:0}
+.live{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--text3)}
+.ldot{width:6px;height:6px;border-radius:50%;background:var(--up);animation:pu 2s infinite;flex-shrink:0}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
+.main{padding:16px 22px 48px}
+.slbl{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text3);padding:14px 0 8px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.cgrid{display:flex;flex-direction:column;gap:12px}
+.krow{display:grid;gap:10px;margin-bottom:14px}
+.krow5{grid-template-columns:repeat(5,1fr)}
+.krow6{grid-template-columns:repeat(6,1fr)}
+.kpi{background:var(--card);border:0.5px solid var(--border);border-radius:8px;padding:13px 15px}
+.kpi.hl{border-top:2px solid var(--accent)}
+.kl{font-size:9px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.kv{font-size:21px;font-weight:600;letter-spacing:-.025em;margin-bottom:3px;font-variant-numeric:tabular-nums}
+.ks{font-size:10.5px;display:flex;align-items:center;gap:5px}
+.bg{font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:4px}
+.bgg{background:var(--upbg);color:var(--up)}
+.bgr{background:var(--dnbg);color:var(--dn)}
+.bgf{background:#F0EFEC;color:var(--text3)}
+.card{background:var(--card);border:0.5px solid var(--border);border-radius:8px;overflow:hidden}
+.chdr{padding:9px 16px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;
+  justify-content:space-between;background:#FAFAF8;flex-wrap:wrap;gap:6px}
+.ct{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.cm{font-size:10px;color:var(--text3)}
+.cnote{font-size:9px;font-weight:500;padding:2px 8px;border-radius:4px;background:var(--amberbg);color:var(--amber)}
+.bxrow{display:grid;grid-template-columns:repeat(3,1fr)}
+.bx{border-right:0.5px solid var(--border)}
+.bx:last-child{border-right:none}
+.bxh{font-size:8.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:6px 12px;border-bottom:0.5px solid var(--border);background:#FAFAF8}
+.bx table{width:100%;border-collapse:collapse}
+.bx th{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;
+  padding:5px 12px;text-align:right;border-bottom:0.5px solid var(--borderl);white-space:nowrap}
+.bx th:first-child{text-align:left}
+.bx td{padding:5px 12px;text-align:right;border-bottom:0.5px solid var(--borderl);
+  font-size:11px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--text)}
+.bx td:first-child{text-align:left;font-weight:600}
+.bx tr:last-child td{font-weight:700;border-bottom:none;background:#FAFAF8}
+.tw{overflow-x:auto}
+table.W{width:100%;border-collapse:collapse;font-size:11px;min-width:800px}
+table.W th{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  padding:6px 9px;text-align:right;white-space:nowrap;
+  background:#FAFAF8;border-bottom:0.5px solid var(--border);border-top:0.5px solid var(--border)}
+table.W th.bc{text-align:left;border-right:1px solid var(--border);min-width:140px}
+table.W th.gh{text-align:center;font-size:8.5px;padding:5px 9px;
+  border-left:1px solid var(--border);border-right:1px solid var(--border);background:#EFEDE5}
+table.W td{padding:5px 9px;text-align:right;border-bottom:0.5px solid var(--borderl);
+  font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--text)}
+table.W td.bc{text-align:left;color:var(--text2);border-right:1px solid var(--borderl);font-weight:500}
+table.W td.gl{border-left:1px solid var(--borderl)}
+table.W td.gr{border-right:1px solid var(--borderl)}
+tr.sub td{background:#F4F3EE;font-weight:700!important;color:var(--text)!important}
+tr.sub td.bc{color:var(--text)!important}
+tr.tot td{background:#ECEAE4;font-weight:700!important;border-top:1px solid var(--border)!important;color:var(--text)!important}
+tr.tot td.bc{color:var(--text)!important}
+table.W tr:not(.sub):not(.tot):hover td{background:#EEF3FB}
+.ind{padding-left:22px!important;color:var(--text3)!important;font-weight:400!important}
+.rag{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.rg{background:var(--up)}.ra{background:var(--amber)}.rr{background:var(--dn)}
+.up{color:var(--up)}.dn{color:var(--dn)}.fl{color:var(--text3)}.na{color:var(--text3)}
+.pgbar{display:inline-flex;align-items:center;gap:6px}
+.pgbar-track{height:5px;border-radius:3px;background:var(--borderl);width:50px;flex-shrink:0}
+.pgbar-fill{height:100%;border-radius:3px;background:var(--up)}
+.pgbar-fill.am{background:var(--amber)}
+.pgbar-fill.rd{background:var(--dn)}
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;background:#0C0C0E;color:#fff;
+  padding:11px 16px;border-radius:8px;font-size:12px;font-weight:500;
+  opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+@media print{
+  @page{size:A4 landscape;margin:6mm 9mm}
+  body{background:#fff;font-size:7pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .nav,.fbar,.toast{display:none!important}
+  .main{padding:0}
+  .phdr{display:flex!important}
+  .krow{gap:5px;margin-bottom:8px}
+  .kpi{padding:6px 8px;border-radius:3px}
+  .kv{font-size:12pt}.kl,.ks{font-size:5.5pt}
+  .card{border-radius:3px}.chdr{padding:4px 10px}.ct{font-size:6pt}
+  .bxh{font-size:5pt;padding:3px 7px}.bx th,.bx td{font-size:5.5pt;padding:3px 7px}
+  table.W th{font-size:5pt;padding:2px 4px}table.W td{font-size:6pt;padding:2px 4px}
+  table.W th.bc{min-width:60pt}.tw{overflow:visible}.cgrid{gap:6px}
+  .slbl{padding:8px 0 5px;margin-bottom:7px}
+}
+.phdr{display:none;background:#0C0C0E;color:#fff;padding:10px 16px;
+  justify-content:space-between;align-items:center;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="phdr" id="phdr">
+  <div>
+    <div style="font-size:7pt;letter-spacing:.12em;text-transform:uppercase;color:#555;margin-bottom:2px">Sumwon Studios</div>
+    <div style="font-size:12pt;font-weight:700" id="ph-title">Performance Dashboard</div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:16pt;font-weight:700" id="ph-wk">-</div>
+    <div style="font-size:7pt;color:#999" id="ph-dt">-</div>
+  </div>
+</div>
+<nav class="nav">
+  <div class="nb"><span class="ne">Sumwon Studios</span><span class="nt">Performance Dashboard</span></div>
+  <div class="vtabs">
+    <button class="vtab active" data-v="week">Weekly</button>
+    <button class="vtab" data-v="month">Monthly</button>
+    <button class="vtab" data-v="ytd">YTD</button>
+  </div>
+  <div class="nsp"></div>
+  <button class="nbtn btn-pdf" id="btn-pdf">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export PDF
+  </button>
+  <button class="nbtn btn-send" id="btn-send">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    Send to CEO
+  </button>
+</nav>
+<div class="fbar">
+  <span class="fl">Period</span>
+  <select class="fdrop" id="sel-period"></select>
+  <div class="fdiv"></div>
+  <span class="fl">Currency</span>
+  <select class="fdrop" id="sel-fx">
+    <option value="1" data-sym="$">USD ($)</option>
+    <option value="0.787" data-sym="&pound;">GBP (&pound;)</option>
+    <option value="3.67" data-sym="&#1583;.&#1573;">AED</option>
+  </select>
+  <div class="fdiv"></div>
+  <span class="live"><span class="ldot"></span>W15-W26 2026 &middot; 4 data sources</span>
+</div>
+<main class="main"><div id="app"><p style="padding:30px;color:var(--text3)">Loading...</p></div></main>
+<div class="toast" id="toast"></div>
+<script>
+(function() {
+"use strict";
+
+var RAW = {"weeks": ["2026-W15", "2026-W16", "2026-W17", "2026-W18", "2026-W19", "2026-W20", "2026-W21", "2026-W22", "2026-W23", "2026-W24", "2026-W25", "2026-W26", "2026-W27"], "brands": ["MISSGUIDED", "MISSGUIDED - Playboy", "AiiRZ", "SUMWON - Women", "SUMWON - Men", "SUMWON - Kids", "SUMWON - Playboy", "BABYPHAT", "KIZN", "KSTM"], "display": {"MISSGUIDED": "Missguided", "MISSGUIDED - Playboy": "Playboy \u00d7 MSG", "AiiRZ": "AiiRZ", "SUMWON - Women": "Sumwon Women", "SUMWON - Men": "Sumwon Men", "SUMWON - Kids": "Sumwon Kids", "SUMWON - Playboy": "Playboy \u00d7 SWM", "BABYPHAT": "Baby Phat", "KIZN": "KIZN", "KSTM": "KSTM"}, "data": {"2026-W15": {"MISSGUIDED": {"d": "Missguided", "sr": 2531891.0, "sp": 1115132.0, "spp": 44.0, "wr": 234186.0, "wp": 111421.0, "wpp": 47.6, "us": 150989.0, "uw": 13212.0, "hrt": 31.0, "hrn": 19.3, "skl": 329.0, "ivw": 1165698.0, "cvd": 49.7, "w_rev": 476279.0, "w_rev_ar": 423556.0, "w_tgt": 588170.0, "w_tgt_cr": 81.0, "w_spend": 164854.0, "w_roas": 2.9, "w_roas_ar": 2.6, "w_cac": 31.5, "w_cac_dm": 22.0, "w_orders": 9106.0, "w_items": 25459.0, "w_aov": 52.3, "w_ito": 2.8, "w_asp": 18.7, "w_cr": 1.4, "w_tdr": 25.7, "w_pc2pct": 50.5, "w_pc2": 240568.2, "w_pc2tgt": 300558.0, "w_new_cust": 7503.0, "w_ret_cust": 1285.0, "w_ret_pct": 14.6, "w_users": 648239.0, "w_coupon": 71390.9}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 328222.0, "sp": 125513.0, "spp": 38.2, "wr": 31555.0, "wp": 15695.0, "wpp": 49.7, "us": 20944.0, "uw": 1586.0, "hrt": 14.1, "hrn": 13.0, "skl": 71.0, "ivw": 248989.0, "cvd": 77.4, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 519584.0, "sp": 211643.0, "spp": 40.7, "wr": 40922.0, "wp": 20996.0, "wpp": 51.3, "us": 32471.0, "uw": 2311.0, "hrt": 22.1, "hrn": 10.3, "skl": 136.0, "ivw": 210625.0, "cvd": 42.4, "w_rev": 1354.0, "w_rev_ar": 83.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 5.0, "w_items": 43.0, "w_aov": 270.8, "w_ito": 8.6, "w_asp": 31.5, "w_cr": 0.2, "w_tdr": 15.1, "w_pc2pct": 54.7, "w_pc2": 740.4, "w_pc2tgt": 0.0, "w_new_cust": 5.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 2594.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1084127.0, "sp": 461334.0, "spp": 42.6, "wr": 56435.0, "wp": 28740.0, "wpp": 50.9, "us": 72214.0, "uw": 3475.0, "hrt": 29.6, "hrn": 15.3, "skl": 159.0, "ivw": 396802.0, "cvd": 36.7, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 686995.0, "sp": 218675.0, "spp": 31.8, "wr": 21467.0, "wp": 10788.0, "wpp": 50.3, "us": 41973.0, "uw": 1122.0, "hrt": 9.2, "hrn": 4.8, "skl": 109.0, "ivw": 424889.0, "cvd": 69.0, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 337564.0, "sp": 106822.0, "spp": 31.6, "wr": 256.0, "wp": 124.0, "wpp": 48.4, "us": 25444.0, "uw": 16.0, "hrt": 24.0, "hrn": 7.7, "skl": 121.0, "ivw": 329261.0, "cvd": 90.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 76985.0, "sp": 18763.0, "spp": 24.4, "wr": 2283.0, "wp": 1280.0, "wpp": 56.1, "us": 4776.0, "uw": 114.0, "hrt": 0.0, "hrn": 0.0, "skl": 1.0, "ivw": 60218.0, "cvd": 86.2, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 237881.0, "sp": 110688.0, "spp": 46.5, "wr": 96264.0, "wp": 56343.0, "wpp": 58.5, "us": 10720.0, "uw": 4003.0, "hrt": 22.4, "hrn": 13.2, "skl": 76.0, "ivw": 99084.0, "cvd": 47.1, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 628477.0, "sp": 221659.0, "spp": 35.3, "wr": 32243.0, "wp": 16500.0, "wpp": 51.2, "us": 34490.0, "uw": 1901.0, "hrt": 35.3, "hrn": 24.5, "skl": 116.0, "ivw": 235638.0, "cvd": 45.3, "w_rev": 7560.0, "w_rev_ar": 1237.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 4.4, "w_cac_dm": 0.0, "w_orders": 19.0, "w_items": 502.0, "w_aov": 397.9, "w_ito": 26.4, "w_asp": 15.1, "w_cr": 0.7, "w_tdr": 7.6, "w_pc2pct": 57.4, "w_pc2": 4343.1, "w_pc2tgt": 0.0, "w_new_cust": 14.0, "w_ret_cust": 3.0, "w_ret_pct": 17.6, "w_users": 2633.0, "w_coupon": 61.5}, "KSTM": {"d": "KSTM", "sr": 39599.0, "sp": 12148.0, "spp": 30.7, "wr": 5359.0, "wp": 2839.0, "wpp": 53.0, "us": 2347.0, "uw": 256.0, "hrt": 6.3, "hrn": 6.3, "skl": 63.0, "ivw": 64127.0, "cvd": 172.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W16": {"MISSGUIDED": {"d": "Missguided", "sr": 2565261.0, "sp": 1138890.0, "spp": 44.4, "wr": 289018.0, "wp": 129379.0, "wpp": 44.8, "us": 151403.0, "uw": 17326.0, "hrt": 22.8, "hrn": 13.5, "skl": 413.0, "ivw": 1182650.0, "cvd": 49.1, "w_rev": 549840.0, "w_rev_ar": 465848.0, "w_tgt": 581008.0, "w_tgt_cr": 94.6, "w_spend": 195942.0, "w_roas": 2.8, "w_roas_ar": 2.4, "w_cac": 33.0, "w_cac_dm": 21.4, "w_orders": 10868.0, "w_items": 31629.0, "w_aov": 50.6, "w_ito": 2.9, "w_asp": 17.4, "w_cr": 1.5, "w_tdr": 31.4, "w_pc2pct": 47.7, "w_pc2": 262146.6, "w_pc2tgt": 302093.0, "w_new_cust": 9138.0, "w_ret_cust": 1361.0, "w_ret_pct": 13.0, "w_users": 741010.0, "w_coupon": 105406.4}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 312777.0, "sp": 123475.0, "spp": 39.5, "wr": 33910.0, "wp": 15413.0, "wpp": 45.5, "us": 19387.0, "uw": 1945.0, "hrt": 2.0, "hrn": 2.0, "skl": 51.0, "ivw": 248482.0, "cvd": 81.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 527500.0, "sp": 220858.0, "spp": 41.9, "wr": 52650.0, "wp": 26556.0, "wpp": 50.4, "us": 31868.0, "uw": 3117.0, "hrt": 39.1, "hrn": 36.8, "skl": 156.0, "ivw": 222489.0, "cvd": 44.5, "w_rev": 287.0, "w_rev_ar": 239.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 4.0, "w_items": 13.0, "w_aov": 71.7, "w_ito": 3.3, "w_asp": 22.1, "w_cr": 0.1, "w_tdr": 1.1, "w_pc2pct": 67.8, "w_pc2": 194.5, "w_pc2tgt": 0.0, "w_new_cust": 3.0, "w_ret_cust": 1.0, "w_ret_pct": 25.0, "w_users": 6639.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1095956.0, "sp": 485773.0, "spp": 44.3, "wr": 66322.0, "wp": 33541.0, "wpp": 50.6, "us": 70194.0, "uw": 3931.0, "hrt": 30.3, "hrn": 22.0, "skl": 142.0, "ivw": 417370.0, "cvd": 39.4, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 685090.0, "sp": 235762.0, "spp": 34.4, "wr": 5752.0, "wp": 3112.0, "wpp": 54.1, "us": 40651.0, "uw": 289.0, "hrt": 13.9, "hrn": 10.2, "skl": 173.0, "ivw": 431760.0, "cvd": 73.8, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 359349.0, "sp": 128447.0, "spp": 35.7, "wr": 108.0, "wp": 56.0, "wpp": 51.8, "us": 25525.0, "uw": 6.0, "hrt": 36.0, "hrn": 23.1, "skl": 86.0, "ivw": 328433.0, "cvd": 90.0, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 70704.0, "sp": 21325.0, "spp": 30.2, "wr": 490.0, "wp": 262.0, "wpp": 53.5, "us": 3941.0, "uw": 26.0, "hrt": 2.1, "hrn": 0.0, "skl": 47.0, "ivw": 62886.0, "cvd": 111.0, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 239593.0, "sp": 108447.0, "spp": 45.3, "wr": 84174.0, "wp": 47375.0, "wpp": 56.3, "us": 11009.0, "uw": 3822.0, "hrt": 11.9, "hrn": 3.8, "skl": 42.0, "ivw": 100199.0, "cvd": 47.3, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 632199.0, "sp": 246686.0, "spp": 39.0, "wr": 26434.0, "wp": 12705.0, "wpp": 48.1, "us": 32347.0, "uw": 1518.0, "hrt": 31.7, "hrn": 15.1, "skl": 104.0, "ivw": 242195.0, "cvd": 50.1, "w_rev": 262.0, "w_rev_ar": 262.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.6, "w_cac_dm": 0.0, "w_orders": 8.0, "w_items": 10.0, "w_aov": 32.8, "w_ito": 1.3, "w_asp": 26.2, "w_cr": 0.2, "w_tdr": 9.2, "w_pc2pct": 64.7, "w_pc2": 169.7, "w_pc2tgt": 0.0, "w_new_cust": 7.0, "w_ret_cust": 1.0, "w_ret_pct": 12.5, "w_users": 3574.0, "w_coupon": 4.5}, "KSTM": {"d": "KSTM", "sr": 44651.0, "sp": 14734.0, "spp": 33.0, "wr": 7500.0, "wp": 3374.0, "wpp": 45.0, "us": 2540.0, "uw": 411.0, "hrt": 100.0, "hrn": null, "skl": 2.0, "ivw": 63235.0, "cvd": 150.0, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W17": {"MISSGUIDED": {"d": "Missguided", "sr": 2658998.0, "sp": 1150183.0, "spp": 43.3, "wr": 322190.0, "wp": 153899.0, "wpp": 47.8, "us": 159867.0, "uw": 18151.0, "hrt": 20.4, "hrn": 17.8, "skl": 652.0, "ivw": 1280879.0, "cvd": 50.4, "w_rev": 580494.0, "w_rev_ar": 530171.0, "w_tgt": 593402.0, "w_tgt_cr": 97.8, "w_spend": 243729.0, "w_roas": 2.4, "w_roas_ar": 2.2, "w_cac": 32.8, "w_cac_dm": 24.2, "w_orders": 11828.0, "w_items": 31816.0, "w_aov": 49.1, "w_ito": 2.7, "w_asp": 18.2, "w_cr": 1.4, "w_tdr": 29.3, "w_pc2pct": 50.2, "w_pc2": 291262.9, "w_pc2tgt": 305457.0, "w_new_cust": 10085.0, "w_ret_cust": 1374.0, "w_ret_pct": 12.0, "w_users": 841492.0, "w_coupon": 86893.7}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 309781.0, "sp": 117486.0, "spp": 37.9, "wr": 26856.0, "wp": 11830.0, "wpp": 44.0, "us": 19521.0, "uw": 1570.0, "hrt": 10.3, "hrn": 10.3, "skl": 29.0, "ivw": 245750.0, "cvd": 81.6, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 537004.0, "sp": 228968.0, "spp": 42.6, "wr": 65332.0, "wp": 35470.0, "wpp": 54.3, "us": 32563.0, "uw": 3626.0, "hrt": 16.8, "hrn": 14.9, "skl": 143.0, "ivw": 249821.0, "cvd": 48.3, "w_rev": 55.0, "w_rev_ar": 55.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 2.0, "w_items": 2.0, "w_aov": 27.6, "w_ito": 1.0, "w_asp": 27.6, "w_cr": 0.0, "w_tdr": 3.4, "w_pc2pct": 64.7, "w_pc2": 35.7, "w_pc2tgt": 0.0, "w_new_cust": 2.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 6308.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1080337.0, "sp": 487118.0, "spp": 45.1, "wr": 66952.0, "wp": 36677.0, "wpp": 54.8, "us": 68601.0, "uw": 3800.0, "hrt": 33.3, "hrn": 34.0, "skl": 99.0, "ivw": 426855.0, "cvd": 41.3, "w_rev": 10.0, "w_rev_ar": 0.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 1.0, "w_items": 1.0, "w_aov": 10.3, "w_ito": 1.0, "w_asp": 10.3, "w_cr": null, "w_tdr": 0.0, "w_pc2pct": 50.2, "w_pc2": 5.2, "w_pc2tgt": 0.0, "w_new_cust": 1.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 0.0, "w_coupon": 0.0}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 680828.0, "sp": 244350.0, "spp": 35.9, "wr": 4096.0, "wp": 2315.0, "wpp": 56.5, "us": 39884.0, "uw": 197.0, "hrt": 14.4, "hrn": 10.6, "skl": 202.0, "ivw": 448545.0, "cvd": 78.3, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 359028.0, "sp": 142587.0, "spp": 39.7, "wr": 31.0, "wp": 21.0, "wpp": 69.0, "us": 23988.0, "uw": 2.0, "hrt": 23.7, "hrn": 14.3, "skl": 38.0, "ivw": 328517.0, "cvd": 95.9, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 64689.0, "sp": 20933.0, "spp": 32.4, "wr": 337.0, "wp": 184.0, "wpp": 54.6, "us": 3544.0, "uw": 16.0, "hrt": 12.1, "hrn": 10.7, "skl": 33.0, "ivw": 65207.0, "cvd": 128.2, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 226707.0, "sp": 107608.0, "spp": 47.5, "wr": 60033.0, "wp": 34540.0, "wpp": 57.5, "us": 10450.0, "uw": 2540.0, "hrt": 14.0, "hrn": 6.7, "skl": 50.0, "ivw": 107427.0, "cvd": 57.9, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 633215.0, "sp": 255730.0, "spp": 40.4, "wr": 29863.0, "wp": 15044.0, "wpp": 50.4, "us": 32075.0, "uw": 1625.0, "hrt": 36.7, "hrn": 34.5, "skl": 109.0, "ivw": 254472.0, "cvd": 52.9, "w_rev": 848.0, "w_rev_ar": 759.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 1.8, "w_cac_dm": 0.0, "w_orders": 9.0, "w_items": 31.0, "w_aov": 94.3, "w_ito": 3.4, "w_asp": 27.4, "w_cr": 0.3, "w_tdr": 8.6, "w_pc2pct": 60.2, "w_pc2": 510.7, "w_pc2tgt": 0.0, "w_new_cust": 8.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 3318.0, "w_coupon": 14.4}, "KSTM": {"d": "KSTM", "sr": 51381.0, "sp": 16688.0, "spp": 32.5, "wr": 12304.0, "wp": 5657.0, "wpp": 46.0, "us": 2832.0, "uw": 652.0, "hrt": 14.3, "hrn": 11.5, "skl": 28.0, "ivw": 65199.0, "cvd": 131.0, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W18": {"MISSGUIDED": {"d": "Missguided", "sr": 3023732.0, "sp": 1288536.0, "spp": 42.6, "wr": 350749.0, "wp": 162689.0, "wpp": 46.4, "us": 186393.0, "uw": 20515.0, "hrt": 24.7, "hrn": 18.1, "skl": 243.0, "ivw": 1222023.0, "cvd": 41.3, "w_rev": 611515.0, "w_rev_ar": 558986.0, "w_tgt": 695758.0, "w_tgt_cr": 87.9, "w_spend": 275731.0, "w_roas": 2.2, "w_roas_ar": 2.0, "w_cac": 36.4, "w_cac_dm": 24.9, "w_orders": 13473.0, "w_items": 35021.0, "w_aov": 45.4, "w_ito": 2.6, "w_asp": 17.5, "w_cr": 1.2, "w_tdr": 33.7, "w_pc2pct": 48.8, "w_pc2": 298624.2, "w_pc2tgt": 357518.0, "w_new_cust": 11062.0, "w_ret_cust": 1934.0, "w_ret_pct": 14.9, "w_users": 1127793.0, "w_coupon": 126608.7}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 351431.0, "sp": 121277.0, "spp": 34.5, "wr": 26582.0, "wp": 11207.0, "wpp": 42.2, "us": 23612.0, "uw": 1587.0, "hrt": 31.2, "hrn": 29.8, "skl": 48.0, "ivw": 235712.0, "cvd": 65.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 615922.0, "sp": 262090.0, "spp": 42.6, "wr": 78490.0, "wp": 42290.0, "wpp": 53.9, "us": 37972.0, "uw": 4441.0, "hrt": 32.6, "hrn": 32.3, "skl": 89.0, "ivw": 246443.0, "cvd": 40.7, "w_rev": 0.0, "w_rev_ar": 0.0, "w_tgt": 255.0, "w_tgt_cr": 0.0, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": 0.0, "w_items": 0.0, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": 0.0, "w_tdr": null, "w_pc2pct": null, "w_pc2": 0.0, "w_pc2tgt": 143.0, "w_new_cust": 0.0, "w_ret_cust": 0.0, "w_ret_pct": null, "w_users": 6709.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1130569.0, "sp": 499362.0, "spp": 44.2, "wr": 70295.0, "wp": 38106.0, "wpp": 54.2, "us": 72681.0, "uw": 4109.0, "hrt": 32.6, "hrn": 25.5, "skl": 172.0, "ivw": 426183.0, "cvd": 38.8, "w_rev": 1512.0, "w_rev_ar": 1512.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 23.0, "w_items": 68.0, "w_aov": 65.7, "w_ito": 3.0, "w_asp": 22.2, "w_cr": null, "w_tdr": 18.3, "w_pc2pct": 57.8, "w_pc2": 874.7, "w_pc2tgt": 0.0, "w_new_cust": 23.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 0.0, "w_coupon": 0.0}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 793063.0, "sp": 283268.0, "spp": 35.7, "wr": 12424.0, "wp": 7353.0, "wpp": 59.2, "us": 47378.0, "uw": 582.0, "hrt": 17.6, "hrn": 11.1, "skl": 108.0, "ivw": 443943.0, "cvd": 64.8, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 489724.0, "sp": 196705.0, "spp": 40.2, "wr": 40.0, "wp": 25.0, "wpp": 61.7, "us": 32675.0, "uw": 1.0, "hrt": 25.0, "hrn": 5.0, "skl": 44.0, "ivw": 319917.0, "cvd": 68.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 71825.0, "sp": 22008.0, "spp": 30.6, "wr": 1688.0, "wp": 955.0, "wpp": 56.6, "us": 4136.0, "uw": 73.0, "hrt": 0.0, "hrn": 0.0, "skl": 14.0, "ivw": 64462.0, "cvd": 107.2, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 229547.0, "sp": 112330.0, "spp": 48.9, "wr": 49192.0, "wp": 27301.0, "wpp": 55.5, "us": 10281.0, "uw": 2257.0, "hrt": 10.3, "hrn": 10.0, "skl": 39.0, "ivw": 108400.0, "cvd": 60.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 733315.0, "sp": 282237.0, "spp": 38.5, "wr": 28076.0, "wp": 14351.0, "wpp": 51.1, "us": 38706.0, "uw": 1605.0, "hrt": 37.1, "hrn": 37.9, "skl": 116.0, "ivw": 253794.0, "cvd": 44.1, "w_rev": 1912.0, "w_rev_ar": 1872.0, "w_tgt": 3030.0, "w_tgt_cr": 63.1, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 2.8, "w_cac_dm": 0.0, "w_orders": 26.0, "w_items": 83.0, "w_aov": 73.6, "w_ito": 3.2, "w_asp": 23.0, "w_cr": 0.3, "w_tdr": 4.3, "w_pc2pct": 64.3, "w_pc2": 1230.2, "w_pc2tgt": 1649.0, "w_new_cust": 23.0, "w_ret_cust": 1.0, "w_ret_pct": 4.2, "w_users": 7748.0, "w_coupon": 64.6}, "KSTM": {"d": "KSTM", "sr": 65716.0, "sp": 21002.0, "spp": 32.0, "wr": 12662.0, "wp": 5605.0, "wpp": 44.3, "us": 3830.0, "uw": 716.0, "hrt": 15.1, "hrn": 15.1, "skl": 93.0, "ivw": 73380.0, "cvd": 113.0, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W19": {"MISSGUIDED": {"d": "Missguided", "sr": 3116632.0, "sp": 1369789.0, "spp": 44.0, "wr": 372721.0, "wp": 172057.0, "wpp": 46.2, "us": 191553.0, "uw": 22149.0, "hrt": 21.0, "hrn": 11.4, "skl": 453.0, "ivw": 1195309.0, "cvd": 39.2, "w_rev": 625904.0, "w_rev_ar": 572389.0, "w_tgt": 823787.0, "w_tgt_cr": 76.0, "w_spend": 267504.0, "w_roas": 2.3, "w_roas_ar": 2.1, "w_cac": 37.3, "w_cac_dm": 23.8, "w_orders": 13603.0, "w_items": 36716.0, "w_aov": 46.0, "w_ito": 2.7, "w_asp": 17.0, "w_cr": 1.2, "w_tdr": 35.2, "w_pc2pct": 48.4, "w_pc2": 302660.9, "w_pc2tgt": 432454.0, "w_new_cust": 11230.0, "w_ret_cust": 1869.0, "w_ret_pct": 14.3, "w_users": 1105611.0, "w_coupon": 151192.5}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 338817.0, "sp": 119440.0, "spp": 35.3, "wr": 23604.0, "wp": 10042.0, "wpp": 42.5, "us": 22970.0, "uw": 1429.0, "hrt": 13.9, "hrn": 11.7, "skl": 79.0, "ivw": 231169.0, "cvd": 66.3, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 622322.0, "sp": 270495.0, "spp": 43.5, "wr": 79768.0, "wp": 43228.0, "wpp": 54.2, "us": 37869.0, "uw": 4679.0, "hrt": 31.7, "hrn": 27.5, "skl": 82.0, "ivw": 242584.0, "cvd": 39.9, "w_rev": 36.0, "w_rev_ar": 36.0, "w_tgt": 609.0, "w_tgt_cr": 5.9, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 2.0, "w_items": 2.0, "w_aov": 18.0, "w_ito": 1.0, "w_asp": 18.0, "w_cr": 0.0, "w_tdr": 0.0, "w_pc2pct": 71.3, "w_pc2": 25.7, "w_pc2tgt": 343.0, "w_new_cust": 2.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 5462.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1196956.0, "sp": 540884.0, "spp": 45.2, "wr": 65677.0, "wp": 35010.0, "wpp": 53.3, "us": 75958.0, "uw": 3966.0, "hrt": 17.4, "hrn": 14.7, "skl": 172.0, "ivw": 419775.0, "cvd": 36.8, "w_rev": 3130.0, "w_rev_ar": 2891.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 56.0, "w_items": 152.0, "w_aov": 55.9, "w_ito": 2.7, "w_asp": 20.6, "w_cr": null, "w_tdr": 19.0, "w_pc2pct": 57.6, "w_pc2": 1803.6, "w_pc2tgt": 0.0, "w_new_cust": 56.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 0.0, "w_coupon": 0.0}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 798680.0, "sp": 285861.0, "spp": 35.8, "wr": 14775.0, "wp": 9056.0, "wpp": 61.3, "us": 47718.0, "uw": 656.0, "hrt": 12.4, "hrn": 9.2, "skl": 250.0, "ivw": 456140.0, "cvd": 66.0, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 442904.0, "sp": 181840.0, "spp": 41.1, "wr": 0, "wp": 0, "wpp": 0, "us": 29185.0, "uw": 0, "hrt": 9.7, "hrn": 5.4, "skl": 269.0, "ivw": 338294.0, "cvd": 81.1, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 70509.0, "sp": 22234.0, "spp": 31.5, "wr": 1191.0, "wp": 688.0, "wpp": 57.7, "us": 4226.0, "uw": 50.0, "hrt": 4.4, "hrn": 4.5, "skl": 45.0, "ivw": 67151.0, "cvd": 109.9, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 216520.0, "sp": 104817.0, "spp": 48.4, "wr": 44625.0, "wp": 23932.0, "wpp": 53.6, "us": 9824.0, "uw": 2151.0, "hrt": 24.1, "hrn": 31.8, "skl": 29.0, "ivw": 108046.0, "cvd": 63.2, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 781206.0, "sp": 307583.0, "spp": 39.4, "wr": 29030.0, "wp": 14609.0, "wpp": 50.3, "us": 41101.0, "uw": 1673.0, "hrt": 38.4, "hrn": 40.0, "skl": 73.0, "ivw": 246076.0, "cvd": 40.3, "w_rev": 1837.0, "w_rev_ar": 1548.0, "w_tgt": 7205.0, "w_tgt_cr": 25.5, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 6.3, "w_cac_dm": 0.0, "w_orders": 21.0, "w_items": 64.0, "w_aov": 87.5, "w_ito": 3.0, "w_asp": 28.7, "w_cr": 0.4, "w_tdr": 5.8, "w_pc2pct": 64.3, "w_pc2": 1180.7, "w_pc2tgt": 3984.0, "w_new_cust": 18.0, "w_ret_cust": 1.0, "w_ret_pct": 5.3, "w_users": 5139.0, "w_coupon": 113.1}, "KSTM": {"d": "KSTM", "sr": 79152.0, "sp": 24386.0, "spp": 30.8, "wr": 14923.0, "wp": 6572.0, "wpp": 44.0, "us": 4747.0, "uw": 864.0, "hrt": 15.0, "hrn": 14.2, "skl": 247.0, "ivw": 95643.0, "cvd": 119.3, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W20": {"MISSGUIDED": {"d": "Missguided", "sr": 3092392.0, "sp": 1360362.0, "spp": 44.0, "wr": 371506.0, "wp": 181030.0, "wpp": 48.7, "us": 190836.0, "uw": 21139.0, "hrt": 24.1, "hrn": 23.0, "skl": 407.0, "ivw": 1202173.0, "cvd": 39.7, "w_rev": 663594.0, "w_rev_ar": 607456.0, "w_tgt": 805840.0, "w_tgt_cr": 82.3, "w_spend": 258163.0, "w_roas": 2.6, "w_roas_ar": 2.4, "w_cac": 31.3, "w_cac_dm": 21.5, "w_orders": 14348.0, "w_items": 37088.0, "w_aov": 46.2, "w_ito": 2.6, "w_asp": 17.9, "w_cr": 1.2, "w_tdr": 31.1, "w_pc2pct": 51.0, "w_pc2": 338742.4, "w_pc2tgt": 429793.0, "w_new_cust": 11980.0, "w_ret_cust": 1865.0, "w_ret_pct": 13.5, "w_users": 1241034.0, "w_coupon": 116384.2}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 330013.0, "sp": 119083.0, "spp": 36.1, "wr": 21821.0, "wp": 10022.0, "wpp": 45.9, "us": 22118.0, "uw": 1229.0, "hrt": 9.1, "hrn": 9.1, "skl": 143.0, "ivw": 233703.0, "cvd": 70.1, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 616499.0, "sp": 260914.0, "spp": 42.3, "wr": 93857.0, "wp": 52624.0, "wpp": 56.1, "us": 38458.0, "uw": 5259.0, "hrt": 24.8, "hrn": 15.2, "skl": 141.0, "ivw": 246486.0, "cvd": 39.5, "w_rev": 259.0, "w_rev_ar": 259.0, "w_tgt": 595.0, "w_tgt_cr": 43.5, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 4.0, "w_items": 11.0, "w_aov": 64.7, "w_ito": 2.8, "w_asp": 23.5, "w_cr": 0.1, "w_tdr": 0.0, "w_pc2pct": 69.5, "w_pc2": 179.8, "w_pc2tgt": 342.0, "w_new_cust": 3.0, "w_ret_cust": 1.0, "w_ret_pct": 25.0, "w_users": 4906.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1203445.0, "sp": 536052.0, "spp": 44.5, "wr": 80740.0, "wp": 45202.0, "wpp": 56.0, "us": 77820.0, "uw": 4623.0, "hrt": 25.7, "hrn": 21.3, "skl": 280.0, "ivw": 431144.0, "cvd": 36.6, "w_rev": 3119.0, "w_rev_ar": 2620.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 51.0, "w_items": 160.0, "w_aov": 61.2, "w_ito": 3.1, "w_asp": 19.5, "w_cr": null, "w_tdr": 21.1, "w_pc2pct": 58.0, "w_pc2": 1809.2, "w_pc2tgt": 0.0, "w_new_cust": 48.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 0.0, "w_coupon": 0.0}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 802684.0, "sp": 279243.0, "spp": 34.8, "wr": 14033.0, "wp": 7976.0, "wpp": 56.8, "us": 47637.0, "uw": 676.0, "hrt": 7.5, "hrn": 5.8, "skl": 214.0, "ivw": 465358.0, "cvd": 67.4, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 380438.0, "sp": 148445.0, "spp": 39.0, "wr": 0, "wp": 0, "wpp": 0, "us": 25603.0, "uw": 0, "hrt": 8.1, "hrn": 5.6, "skl": 197.0, "ivw": 353508.0, "cvd": 96.7, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 71702.0, "sp": 22015.0, "spp": 30.7, "wr": 1093.0, "wp": 588.0, "wpp": 53.8, "us": 4316.0, "uw": 52.0, "hrt": 0.0, "hrn": 0.0, "skl": 22.0, "ivw": 67934.0, "cvd": 108.9, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 230282.0, "sp": 106314.0, "spp": 46.2, "wr": 44764.0, "wp": 24772.0, "wpp": 55.3, "us": 11127.0, "uw": 2155.0, "hrt": 16.9, "hrn": 22.0, "skl": 77.0, "ivw": 112390.0, "cvd": 59.2, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 815598.0, "sp": 312071.0, "spp": 38.3, "wr": 30932.0, "wp": 16574.0, "wpp": 53.6, "us": 43045.0, "uw": 1690.0, "hrt": 35.4, "hrn": 31.7, "skl": 206.0, "ivw": 256113.0, "cvd": 40.1, "w_rev": 839.0, "w_rev_ar": 839.0, "w_tgt": 7048.0, "w_tgt_cr": 11.9, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 5.0, "w_cac_dm": 0.0, "w_orders": 17.0, "w_items": 41.0, "w_aov": 49.3, "w_ito": 2.4, "w_asp": 20.5, "w_cr": 0.3, "w_tdr": 11.2, "w_pc2pct": 61.9, "w_pc2": 518.9, "w_pc2tgt": 3959.0, "w_new_cust": 15.0, "w_ret_cust": 2.0, "w_ret_pct": 11.8, "w_users": 4955.0, "w_coupon": 74.6}, "KSTM": {"d": "KSTM", "sr": 116729.0, "sp": 31374.0, "spp": 26.9, "wr": 25589.0, "wp": 12006.0, "wpp": 46.9, "us": 7604.0, "uw": 1262.0, "hrt": 17.0, "hrn": 16.1, "skl": 159.0, "ivw": 107065.0, "cvd": 84.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W21": {"MISSGUIDED": {"d": "Missguided", "sr": 2816031.0, "sp": 1216101.0, "spp": 43.2, "wr": 321514.0, "wp": 149487.0, "wpp": 46.5, "us": 178551.0, "uw": 20034.0, "hrt": 22.7, "hrn": 18.6, "skl": 313.0, "ivw": 1216142.0, "cvd": 42.9, "w_rev": 589585.0, "w_rev_ar": 547084.0, "w_tgt": 820968.0, "w_tgt_cr": 71.8, "w_spend": 239872.0, "w_roas": 2.5, "w_roas_ar": 2.3, "w_cac": 30.8, "w_cac_dm": 21.8, "w_orders": 13257.0, "w_items": 36378.0, "w_aov": 44.5, "w_ito": 2.7, "w_asp": 16.2, "w_cr": 1.2, "w_tdr": 33.8, "w_pc2pct": 48.5, "w_pc2": 285881.9, "w_pc2tgt": 432104.0, "w_new_cust": 11002.0, "w_ret_cust": 1792.0, "w_ret_pct": 14.0, "w_users": 1119531.0, "w_coupon": 99346.3}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 287444.0, "sp": 102568.0, "spp": 35.7, "wr": 19911.0, "wp": 8576.0, "wpp": 43.1, "us": 20068.0, "uw": 1208.0, "hrt": 10.4, "hrn": 10.4, "skl": 48.0, "ivw": 228592.0, "cvd": 75.2, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 565936.0, "sp": 229543.0, "spp": 40.6, "wr": 86747.0, "wp": 46004.0, "wpp": 53.0, "us": 37091.0, "uw": 5376.0, "hrt": 25.0, "hrn": 17.6, "skl": 172.0, "ivw": 258369.0, "cvd": 42.6, "w_rev": 86.0, "w_rev_ar": 86.0, "w_tgt": 605.0, "w_tgt_cr": 14.3, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 1.0, "w_items": 2.0, "w_aov": 86.4, "w_ito": 2.0, "w_asp": 43.2, "w_cr": 0.0, "w_tdr": 0.0, "w_pc2pct": 68.8, "w_pc2": 59.4, "w_pc2tgt": 345.0, "w_new_cust": 1.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 3624.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1106471.0, "sp": 476952.0, "spp": 43.1, "wr": 74396.0, "wp": 39282.0, "wpp": 52.8, "us": 74071.0, "uw": 4800.0, "hrt": 26.3, "hrn": 24.5, "skl": 175.0, "ivw": 441775.0, "cvd": 39.2, "w_rev": 2001.0, "w_rev_ar": 1942.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 40.0, "w_items": 118.0, "w_aov": 50.0, "w_ito": 3.0, "w_asp": 17.0, "w_cr": 0.6, "w_tdr": 20.8, "w_pc2pct": 58.5, "w_pc2": 1170.8, "w_pc2tgt": 0.0, "w_new_cust": 39.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 6742.0, "w_coupon": 0.0}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 711811.0, "sp": 249090.0, "spp": 35.0, "wr": 12613.0, "wp": 6323.0, "wpp": 50.1, "us": 42750.0, "uw": 702.0, "hrt": 8.3, "hrn": 7.9, "skl": 133.0, "ivw": 470954.0, "cvd": 75.9, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 269877.0, "sp": 106775.0, "spp": 39.6, "wr": 0, "wp": 0, "wpp": 0, "us": 18146.0, "uw": 0, "hrt": 5.3, "hrn": 4.8, "skl": 94.0, "ivw": 364096.0, "cvd": 140.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 59347.0, "sp": 18618.0, "spp": 31.4, "wr": 1188.0, "wp": 570.0, "wpp": 47.9, "us": 3584.0, "uw": 69.0, "hrt": 4.8, "hrn": 0.0, "skl": 21.0, "ivw": 68655.0, "cvd": 131.6, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 220021.0, "sp": 100788.0, "spp": 45.8, "wr": 40322.0, "wp": 21586.0, "wpp": 53.5, "us": 11221.0, "uw": 2096.0, "hrt": 22.5, "hrn": 24.2, "skl": 80.0, "ivw": 125095.0, "cvd": 65.8, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 734465.0, "sp": 269155.0, "spp": 36.6, "wr": 26506.0, "wp": 13108.0, "wpp": 49.5, "us": 40209.0, "uw": 1682.0, "hrt": 31.2, "hrn": 29.3, "skl": 125.0, "ivw": 267256.0, "cvd": 44.7, "w_rev": 883.0, "w_rev_ar": 883.0, "w_tgt": 7180.0, "w_tgt_cr": 12.3, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 9.5, "w_cac_dm": 0.0, "w_orders": 13.0, "w_items": 50.0, "w_aov": 67.9, "w_ito": 3.8, "w_asp": 17.7, "w_cr": 0.3, "w_tdr": 24.9, "w_pc2pct": 55.2, "w_pc2": 487.3, "w_pc2tgt": 3982.0, "w_new_cust": 12.0, "w_ret_cust": 1.0, "w_ret_pct": 7.7, "w_users": 4409.0, "w_coupon": 114.0}, "KSTM": {"d": "KSTM", "sr": 127946.0, "sp": 31593.0, "spp": 24.7, "wr": 23792.0, "wp": 9888.0, "wpp": 41.6, "us": 9071.0, "uw": 1408.0, "hrt": 18.9, "hrn": 19.3, "skl": 148.0, "ivw": 119843.0, "cvd": 80.1, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W22": {"MISSGUIDED": {"d": "Missguided", "sr": 3185550.0, "sp": 1387800.0, "spp": 43.6, "wr": 307416.0, "wp": 149274.0, "wpp": 48.6, "us": 206360.0, "uw": 18871.0, "hrt": 22.1, "hrn": 19.4, "skl": 303.0, "ivw": 1203415.0, "cvd": 37.4, "w_rev": 571159.0, "w_rev_ar": 535475.0, "w_tgt": 860648.0, "w_tgt_cr": 66.4, "w_spend": 207048.0, "w_roas": 2.8, "w_roas_ar": 2.6, "w_cac": 31.8, "w_cac_dm": 19.0, "w_orders": 13264.0, "w_items": 34660.0, "w_aov": 43.1, "w_ito": 2.6, "w_asp": 16.5, "w_cr": 1.3, "w_tdr": 31.3, "w_pc2pct": 50.2, "w_pc2": 286843.9, "w_pc2tgt": 452039.0, "w_new_cust": 10909.0, "w_ret_cust": 1907.0, "w_ret_pct": 14.9, "w_users": 982963.0, "w_coupon": 139999.5}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 312825.0, "sp": 114338.0, "spp": 36.5, "wr": 16660.0, "wp": 7743.0, "wpp": 46.5, "us": 21989.0, "uw": 957.0, "hrt": 13.2, "hrn": 13.2, "skl": 91.0, "ivw": 227160.0, "cvd": 69.3, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 614752.0, "sp": 250265.0, "spp": 40.7, "wr": 89418.0, "wp": 49097.0, "wpp": 54.9, "us": 41259.0, "uw": 5470.0, "hrt": 19.0, "hrn": 10.0, "skl": 58.0, "ivw": 256920.0, "cvd": 38.5, "w_rev": 145.0, "w_rev_ar": 145.0, "w_tgt": 635.0, "w_tgt_cr": 22.8, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 3.0, "w_items": 5.0, "w_aov": 48.2, "w_ito": 1.7, "w_asp": 28.9, "w_cr": 0.1, "w_tdr": 0.0, "w_pc2pct": 64.3, "w_pc2": 92.9, "w_pc2tgt": 361.0, "w_new_cust": 3.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 4273.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1241490.0, "sp": 530661.0, "spp": 42.7, "wr": 72664.0, "wp": 38917.0, "wpp": 53.6, "us": 85793.0, "uw": 4560.0, "hrt": 30.6, "hrn": 26.2, "skl": 98.0, "ivw": 427448.0, "cvd": 33.1, "w_rev": 3691.0, "w_rev_ar": 3625.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 50.0, "w_items": 177.0, "w_aov": 73.8, "w_ito": 3.5, "w_asp": 20.9, "w_cr": 0.7, "w_tdr": 11.0, "w_pc2pct": 60.7, "w_pc2": 2240.5, "w_pc2tgt": 0.0, "w_new_cust": 46.0, "w_ret_cust": 2.0, "w_ret_pct": 4.2, "w_users": 7186.0, "w_coupon": 0.0}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 813076.0, "sp": 297920.0, "spp": 36.6, "wr": 16150.0, "wp": 8366.0, "wpp": 51.8, "us": 48331.0, "uw": 879.0, "hrt": 8.3, "hrn": 5.3, "skl": 109.0, "ivw": 467597.0, "cvd": 66.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 267411.0, "sp": 106651.0, "spp": 39.9, "wr": 116.0, "wp": 62.0, "wpp": 53.1, "us": 18197.0, "uw": 8.0, "hrt": 4.3, "hrn": 5.4, "skl": 70.0, "ivw": 363910.0, "cvd": 139.9, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 69164.0, "sp": 22498.0, "spp": 32.5, "wr": 1919.0, "wp": 928.0, "wpp": 48.4, "us": 4088.0, "uw": 106.0, "hrt": 3.1, "hrn": 3.2, "skl": 32.0, "ivw": 69537.0, "cvd": 116.1, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 250146.0, "sp": 113076.0, "spp": 45.2, "wr": 36679.0, "wp": 19250.0, "wpp": 52.5, "us": 13077.0, "uw": 1984.0, "hrt": 18.8, "hrn": 15.4, "skl": 69.0, "ivw": 134365.0, "cvd": 62.4, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 797107.0, "sp": 298600.0, "spp": 37.5, "wr": 22143.0, "wp": 11530.0, "wpp": 52.1, "us": 44637.0, "uw": 1385.0, "hrt": 38.7, "hrn": 38.5, "skl": 62.0, "ivw": 264719.0, "cvd": 40.3, "w_rev": 1525.0, "w_rev_ar": 1525.0, "w_tgt": 7526.0, "w_tgt_cr": 20.3, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 8.8, "w_cac_dm": 0.0, "w_orders": 18.0, "w_items": 78.0, "w_aov": 84.7, "w_ito": 4.3, "w_asp": 19.5, "w_cr": 0.5, "w_tdr": 29.0, "w_pc2pct": 52.4, "w_pc2": 798.4, "w_pc2tgt": 4165.0, "w_new_cust": 18.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 3771.0, "w_coupon": 158.6}, "KSTM": {"d": "KSTM", "sr": 192868.0, "sp": 48776.0, "spp": 25.3, "wr": 30386.0, "wp": 13411.0, "wpp": 44.1, "us": 13654.0, "uw": 1665.0, "hrt": 15.3, "hrn": 15.3, "skl": 98.0, "ivw": 126187.0, "cvd": 57.7, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W23": {"MISSGUIDED": {"d": "Missguided", "sr": 3413459.0, "sp": 1526875.0, "spp": 44.7, "wr": 386934.0, "wp": 192839.0, "wpp": 49.8, "us": 216688.0, "uw": 21165.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 1226360.0, "cvd": 36.1, "w_rev": 640525.0, "w_rev_ar": 601367.0, "w_tgt": 652675.0, "w_tgt_cr": 98.1, "w_spend": 209126.0, "w_roas": 3.1, "w_roas_ar": 2.9, "w_cac": 32.8, "w_cac_dm": 19.5, "w_orders": 13183.0, "w_items": 35864.0, "w_aov": 48.6, "w_ito": 2.7, "w_asp": 17.9, "w_cr": 1.5, "w_tdr": 26.5, "w_pc2pct": 51.4, "w_pc2": 329168.2, "w_pc2tgt": 345365.1, "w_new_cust": 10749.0, "w_ret_cust": 1896.0, "w_ret_pct": 15.0, "w_users": 894048.0, "w_coupon": 143750.6}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 347275.0, "sp": 123498.0, "spp": 35.6, "wr": 15043.0, "wp": 7225.0, "wpp": 48.0, "us": 24890.0, "uw": 854.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 221954.0, "cvd": 60.4, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 663342.0, "sp": 278644.0, "spp": 42.0, "wr": 90427.0, "wp": 51271.0, "wpp": 56.7, "us": 43248.0, "uw": 5290.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 272983.0, "cvd": 39.4, "w_rev": 310.0, "w_rev_ar": 310.0, "w_tgt": 1445.0, "w_tgt_cr": 21.4, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 6.0, "w_items": 18.0, "w_aov": 51.7, "w_ito": 3.0, "w_asp": 17.2, "w_cr": 0.1, "w_tdr": 0.0, "w_pc2pct": 70.4, "w_pc2": 218.1, "w_pc2tgt": 863.3, "w_new_cust": 6.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 5462.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1443988.0, "sp": 640311.0, "spp": 44.3, "wr": 61111.0, "wp": 34042.0, "wpp": 55.7, "us": 95332.0, "uw": 3718.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 422648.0, "cvd": 29.9, "w_rev": 4655.0, "w_rev_ar": 4352.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 56.0, "w_items": 241.0, "w_aov": 83.1, "w_ito": 4.3, "w_asp": 19.3, "w_cr": 0.8, "w_tdr": 15.9, "w_pc2pct": 59.3, "w_pc2": 2759.4, "w_pc2tgt": 0.0, "w_new_cust": 53.0, "w_ret_cust": 2.0, "w_ret_pct": 3.6, "w_users": 7253.0, "w_coupon": 0.0}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 874088.0, "sp": 318052.0, "spp": 36.4, "wr": 8622.0, "wp": 4946.0, "wpp": 57.4, "us": 51787.0, "uw": 438.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 472195.0, "cvd": 63.3, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 298572.0, "sp": 111739.0, "spp": 37.4, "wr": 37.0, "wp": 21.0, "wpp": 57.1, "us": 20855.0, "uw": 2.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 377599.0, "cvd": 126.7, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 70903.0, "sp": 22985.0, "spp": 32.4, "wr": 978.0, "wp": 531.0, "wpp": 54.3, "us": 4198.0, "uw": 49.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 69303.0, "cvd": 114.2, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 287590.0, "sp": 128743.0, "spp": 44.8, "wr": 31874.0, "wp": 17009.0, "wpp": 53.4, "us": 15297.0, "uw": 1792.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 120401.0, "cvd": 49.3, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 854037.0, "sp": 330047.0, "spp": 38.6, "wr": 29749.0, "wp": 16038.0, "wpp": 53.9, "us": 47416.0, "uw": 1677.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 277161.0, "cvd": 39.5, "w_rev": 1356.0, "w_rev_ar": 1328.0, "w_tgt": 126.0, "w_tgt_cr": 1077.2, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 2.6, "w_cac_dm": 0.0, "w_orders": 25.0, "w_items": 67.0, "w_aov": 54.2, "w_ito": 2.7, "w_asp": 20.2, "w_cr": 0.6, "w_tdr": 16.7, "w_pc2pct": 61.4, "w_pc2": 832.9, "w_pc2tgt": 86.4, "w_new_cust": 21.0, "w_ret_cust": 3.0, "w_ret_pct": 12.5, "w_users": 4029.0, "w_coupon": 54.7}, "KSTM": {"d": "KSTM", "sr": 244659.0, "sp": 67219.0, "spp": 27.5, "wr": 31294.0, "wp": 14345.0, "wpp": 45.8, "us": 16809.0, "uw": 1684.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 137680.0, "cvd": 52.1, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W24": {"MISSGUIDED": {"d": "Missguided", "sr": 3172464.0, "sp": 1387595.0, "spp": 43.7, "wr": 299570.0, "wp": 150894.0, "wpp": 50.4, "us": 204903.0, "uw": 16559.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 1239399.0, "cvd": 39.2, "w_rev": 541567.0, "w_rev_ar": 515702.0, "w_tgt": 626021.0, "w_tgt_cr": 86.5, "w_spend": 186500.0, "w_roas": 2.9, "w_roas_ar": 2.8, "w_cac": 29.4, "w_cac_dm": 19.8, "w_orders": 11598.0, "w_items": 30356.0, "w_aov": 46.7, "w_ito": 2.6, "w_asp": 17.8, "w_cr": 1.6, "w_tdr": 25.6, "w_pc2pct": 52.2, "w_pc2": 282857.2, "w_pc2tgt": 340205.7, "w_new_cust": 9437.0, "w_ret_cust": 1809.0, "w_ret_pct": 16.1, "w_users": 705412.0, "w_coupon": 91056.4}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 322460.0, "sp": 109854.0, "spp": 34.1, "wr": 11994.0, "wp": 5901.0, "wpp": 49.2, "us": 24274.0, "uw": 655.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 222144.0, "cvd": 62.4, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 627310.0, "sp": 255832.0, "spp": 40.8, "wr": 87272.0, "wp": 49857.0, "wpp": 57.1, "us": 42173.0, "uw": 5121.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 282985.0, "cvd": 41.9, "w_rev": 193.0, "w_rev_ar": 193.0, "w_tgt": 1384.0, "w_tgt_cr": 13.9, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 4.0, "w_items": 7.0, "w_aov": 48.3, "w_ito": 1.8, "w_asp": 27.6, "w_cr": 0.1, "w_tdr": 0.0, "w_pc2pct": 65.3, "w_pc2": 126.0, "w_pc2tgt": 850.4, "w_new_cust": 4.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 6547.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1316327.0, "sp": 576171.0, "spp": 43.8, "wr": 54616.0, "wp": 31042.0, "wpp": 56.8, "us": 88062.0, "uw": 3289.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 461373.0, "cvd": 35.4, "w_rev": 2520.0, "w_rev_ar": 2372.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 40.0, "w_items": 136.0, "w_aov": 63.0, "w_ito": 3.4, "w_asp": 18.5, "w_cr": 0.5, "w_tdr": 16.6, "w_pc2pct": 61.3, "w_pc2": 1544.0, "w_pc2tgt": 0.0, "w_new_cust": 36.0, "w_ret_cust": 3.0, "w_ret_pct": 7.7, "w_users": 8021.0, "w_coupon": 0.0}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 752052.0, "sp": 263140.0, "spp": 35.0, "wr": 11661.0, "wp": 6239.0, "wpp": 53.5, "us": 46030.0, "uw": 646.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 491156.0, "cvd": 73.7, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 287838.0, "sp": 100644.0, "spp": 35.0, "wr": 65.0, "wp": 38.0, "wpp": 58.4, "us": 20946.0, "uw": 4.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 372573.0, "cvd": 124.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 67236.0, "sp": 20938.0, "spp": 31.1, "wr": 1035.0, "wp": 484.0, "wpp": 46.8, "us": 4132.0, "uw": 63.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 69005.0, "cvd": 115.1, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 298573.0, "sp": 127411.0, "spp": 42.7, "wr": 32751.0, "wp": 17659.0, "wpp": 53.9, "us": 17114.0, "uw": 1697.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 123259.0, "cvd": 45.9, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 824320.0, "sp": 309626.0, "spp": 37.6, "wr": 28243.0, "wp": 15542.0, "wpp": 55.0, "us": 47267.0, "uw": 1588.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 286772.0, "cvd": 41.1, "w_rev": 1616.0, "w_rev_ar": 1616.0, "w_tgt": 122.0, "w_tgt_cr": 1326.7, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 8.3, "w_cac_dm": 0.0, "w_orders": 23.0, "w_items": 77.0, "w_aov": 70.3, "w_ito": 3.3, "w_asp": 21.0, "w_cr": 0.4, "w_tdr": 22.9, "w_pc2pct": 57.6, "w_pc2": 931.3, "w_pc2tgt": 85.1, "w_new_cust": 23.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 6189.0, "w_coupon": 191.0}, "KSTM": {"d": "KSTM", "sr": 252432.0, "sp": 62938.0, "spp": 24.9, "wr": 31892.0, "wp": 14738.0, "wpp": 46.2, "us": 18514.0, "uw": 1705.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 146653.0, "cvd": 50.8, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W25": {"MISSGUIDED": {"d": "Missguided", "sr": 2808660.0, "sp": 1257386.0, "spp": 44.8, "wr": 228544.0, "wp": 115780.0, "wpp": 50.7, "us": 176460.0, "uw": 13002.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 1256396.0, "cvd": 46.4, "w_rev": 434886.0, "w_rev_ar": 424216.0, "w_tgt": 622092.0, "w_tgt_cr": 69.9, "w_spend": 151154.0, "w_roas": 2.9, "w_roas_ar": 2.8, "w_cac": 29.6, "w_cac_dm": 19.0, "w_orders": 9607.0, "w_items": 24853.0, "w_aov": 45.3, "w_ito": 2.6, "w_asp": 17.5, "w_cr": 1.5, "w_tdr": 26.6, "w_pc2pct": 52.3, "w_pc2": 227405.0, "w_pc2tgt": 334978.5, "w_new_cust": 7953.0, "w_ret_cust": 1404.0, "w_ret_pct": 15.0, "w_users": 629293.0, "w_coupon": 84595.3}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 285475.0, "sp": 100833.0, "spp": 35.3, "wr": 10280.0, "wp": 5028.0, "wpp": 48.9, "us": 21141.0, "uw": 623.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 220599.0, "cvd": 71.0, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 609101.0, "sp": 254412.0, "spp": 41.8, "wr": 64010.0, "wp": 36205.0, "wpp": 56.6, "us": 40219.0, "uw": 3827.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 285997.0, "cvd": 45.5, "w_rev": 342.0, "w_rev_ar": 342.0, "w_tgt": 1377.0, "w_tgt_cr": 24.9, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 7.0, "w_items": 14.0, "w_aov": 48.9, "w_ito": 2.0, "w_asp": 24.5, "w_cr": 0.1, "w_tdr": 0.0, "w_pc2pct": 66.3, "w_pc2": 227.0, "w_pc2tgt": 837.3, "w_new_cust": 7.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 7117.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1154968.0, "sp": 514756.0, "spp": 44.6, "wr": 50953.0, "wp": 28399.0, "wpp": 55.7, "us": 76336.0, "uw": 3146.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 485703.0, "cvd": 42.8, "w_rev": 2570.0, "w_rev_ar": 2570.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 45.0, "w_items": 119.0, "w_aov": 57.1, "w_ito": 2.6, "w_asp": 21.6, "w_cr": 0.6, "w_tdr": 13.3, "w_pc2pct": 61.3, "w_pc2": 1575.5, "w_pc2tgt": 0.0, "w_new_cust": 43.0, "w_ret_cust": 1.0, "w_ret_pct": 2.3, "w_users": 6928.0, "w_coupon": 0.0}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 657482.0, "sp": 241644.0, "spp": 36.8, "wr": 5257.0, "wp": 3006.0, "wpp": 57.2, "us": 39530.0, "uw": 262.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 508190.0, "cvd": 89.4, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 274052.0, "sp": 98027.0, "spp": 35.8, "wr": 0, "wp": 0, "wpp": 0, "us": 19651.0, "uw": 0, "hrt": null, "hrn": null, "skl": 0, "ivw": 370756.0, "cvd": 132.1, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 54930.0, "sp": 17687.0, "spp": 32.2, "wr": 524.0, "wp": 266.0, "wpp": 50.9, "us": 3327.0, "uw": 29.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 69749.0, "cvd": 145.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 284497.0, "sp": 120594.0, "spp": 42.4, "wr": 29818.0, "wp": 15739.0, "wpp": 52.8, "us": 16473.0, "uw": 1612.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 122606.0, "cvd": 47.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 757219.0, "sp": 299490.0, "spp": 39.6, "wr": 24416.0, "wp": 13498.0, "wpp": 55.3, "us": 42145.0, "uw": 1360.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 301414.0, "cvd": 48.5, "w_rev": 1753.0, "w_rev_ar": 1526.0, "w_tgt": 121.0, "w_tgt_cr": 1449.4, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 2.0, "w_cac_dm": 0.0, "w_orders": 29.0, "w_items": 73.0, "w_aov": 60.5, "w_ito": 2.5, "w_asp": 24.0, "w_cr": 0.4, "w_tdr": 11.5, "w_pc2pct": 62.4, "w_pc2": 1094.7, "w_pc2tgt": 83.8, "w_new_cust": 26.0, "w_ret_cust": 2.0, "w_ret_pct": 7.1, "w_users": 7707.0, "w_coupon": 50.9}, "KSTM": {"d": "KSTM", "sr": 271768.0, "sp": 87635.0, "spp": 32.2, "wr": 31732.0, "wp": 15693.0, "wpp": 49.5, "us": 17439.0, "uw": 1541.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 156099.0, "cvd": 57.6, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W26": {"MISSGUIDED": {"d": "Missguided", "sr": 2790886.0, "sp": 1275325.0, "spp": 45.7, "wr": 175266.0, "wp": 90206.0, "wpp": 51.5, "us": 169553.0, "uw": 9592.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 1275238.0, "cvd": 49.8, "w_rev": 354398.0, "w_rev_ar": 350073.0, "w_tgt": 625418.0, "w_tgt_cr": 56.7, "w_spend": 132964.0, "w_roas": 2.7, "w_roas_ar": 2.6, "w_cac": 31.8, "w_cac_dm": 20.8, "w_orders": 7856.0, "w_items": 19372.0, "w_aov": 45.1, "w_ito": 2.5, "w_asp": 18.3, "w_cr": 1.3, "w_tdr": 24.8, "w_pc2pct": 53.3, "w_pc2": 189004.9, "w_pc2tgt": 329341.5, "w_new_cust": 6401.0, "w_ret_cust": 1311.0, "w_ret_pct": 17.0, "w_users": 593748.0, "w_coupon": 70695.9}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 256062.0, "sp": 94344.0, "spp": 36.8, "wr": 7869.0, "wp": 4013.0, "wpp": 51.0, "us": 18248.0, "uw": 413.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 215457.0, "cvd": 80.8, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 623047.0, "sp": 266008.0, "spp": 42.7, "wr": 56286.0, "wp": 32213.0, "wpp": 57.2, "us": 40212.0, "uw": 3228.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 301102.0, "cvd": 48.5, "w_rev": 160.0, "w_rev_ar": 160.0, "w_tgt": 1385.0, "w_tgt_cr": 11.5, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 3.0, "w_items": 8.0, "w_aov": 53.2, "w_ito": 2.7, "w_asp": 19.9, "w_cr": 0.0, "w_tdr": 0.0, "w_pc2pct": 71.6, "w_pc2": 114.2, "w_pc2tgt": 823.2, "w_new_cust": 3.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 6924.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 1124929.0, "sp": 504442.0, "spp": 44.8, "wr": 41576.0, "wp": 23372.0, "wpp": 56.2, "us": 73257.0, "uw": 2404.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 499642.0, "cvd": 46.2, "w_rev": 4427.0, "w_rev_ar": 4017.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 40.0, "w_items": 216.0, "w_aov": 110.7, "w_ito": 5.4, "w_asp": 20.5, "w_cr": 0.4, "w_tdr": 13.7, "w_pc2pct": 60.9, "w_pc2": 2694.2, "w_pc2tgt": 0.0, "w_new_cust": 38.0, "w_ret_cust": 1.0, "w_ret_pct": 2.6, "w_users": 11189.0, "w_coupon": 0.0}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 659921.0, "sp": 249570.0, "spp": 37.8, "wr": 4472.0, "wp": 2526.0, "wpp": 56.5, "us": 38750.0, "uw": 239.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 526396.0, "cvd": 94.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 269380.0, "sp": 97998.0, "spp": 36.4, "wr": 0, "wp": 0, "wpp": 0, "us": 19202.0, "uw": 0, "hrt": null, "hrn": null, "skl": 0, "ivw": 366926.0, "cvd": 133.8, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 51713.0, "sp": 16966.0, "spp": 32.8, "wr": 808.0, "wp": 496.0, "wpp": 61.4, "us": 3063.0, "uw": 28.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 70725.0, "cvd": 160.2, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 261480.0, "sp": 110705.0, "spp": 42.3, "wr": 25749.0, "wp": 13713.0, "wpp": 53.3, "us": 15096.0, "uw": 1382.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 129016.0, "cvd": 54.8, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 780676.0, "sp": 313690.0, "spp": 40.2, "wr": 19910.0, "wp": 11038.0, "wpp": 55.4, "us": 42604.0, "uw": 1087.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 312839.0, "cvd": 50.1, "w_rev": 1946.0, "w_rev_ar": 1770.0, "w_tgt": 121.0, "w_tgt_cr": 1609.4, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 4.2, "w_cac_dm": 0.0, "w_orders": 39.0, "w_items": 79.0, "w_aov": 49.9, "w_ito": 2.0, "w_asp": 24.6, "w_cr": 0.5, "w_tdr": 13.0, "w_pc2pct": 61.2, "w_pc2": 1191.4, "w_pc2tgt": 82.4, "w_new_cust": 34.0, "w_ret_cust": 4.0, "w_ret_pct": 10.5, "w_users": 7872.0, "w_coupon": 143.6}, "KSTM": {"d": "KSTM", "sr": 309427.0, "sp": 118580.0, "spp": 38.3, "wr": 32175.0, "wp": 17166.0, "wpp": 53.4, "us": 17677.0, "uw": 1485.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 170481.0, "cvd": 62.3, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}, "2026-W27": {"MISSGUIDED": {"d": "Missguided", "sr": 1401905.0, "sp": 651379.0, "spp": 46.5, "wr": 69385.0, "wp": 37047.0, "wpp": 53.4, "us": 83650.0, "uw": 3713.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 1263837.0, "cvd": 101.3, "w_rev": 147869.0, "w_rev_ar": 146360.0, "w_tgt": 193200.0, "w_tgt_cr": 76.5, "w_spend": 48747.0, "w_roas": 3.0, "w_roas_ar": 3.0, "w_cac": 31.0, "w_cac_dm": 18.3, "w_orders": 3293.0, "w_items": 7908.0, "w_aov": 44.9, "w_ito": 2.4, "w_asp": 18.7, "w_cr": 1.5, "w_tdr": 21.5, "w_pc2pct": 55.6, "w_pc2": 82265.3, "w_pc2tgt": 101647.1, "w_new_cust": 2671.0, "w_ret_cust": 562.0, "w_ret_pct": 17.4, "w_users": 218389.0, "w_coupon": 34126.0}, "MISSGUIDED - Playboy": {"d": "Playboy \u00d7 MSG", "sr": 122740.0, "sp": 46370.0, "spp": 37.8, "wr": 3348.0, "wp": 1806.0, "wpp": 54.0, "us": 8576.0, "uw": 164.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 215068.0, "cvd": 172.3, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "AiiRZ": {"d": "AiiRZ", "sr": 310326.0, "sp": 135800.0, "spp": 43.8, "wr": 25778.0, "wp": 15156.0, "wpp": 58.8, "us": 19539.0, "uw": 1414.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 303416.0, "cvd": 101.4, "w_rev": 43.0, "w_rev_ar": 43.0, "w_tgt": 428.0, "w_tgt_cr": 10.0, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 2.0, "w_items": 2.0, "w_aov": 21.4, "w_ito": 1.0, "w_asp": 21.4, "w_cr": 0.1, "w_tdr": 0.0, "w_pc2pct": 68.6, "w_pc2": 29.4, "w_pc2tgt": 254.1, "w_new_cust": 2.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 3485.0, "w_coupon": 0.0}, "SUMWON - Women": {"d": "Sumwon Women", "sr": 526483.0, "sp": 238111.0, "spp": 45.2, "wr": 20009.0, "wp": 11758.0, "wpp": 58.8, "us": 33646.0, "uw": 1152.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 506157.0, "cvd": 101.8, "w_rev": 1026.0, "w_rev_ar": 1026.0, "w_tgt": 0.0, "w_tgt_cr": null, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 0.0, "w_cac_dm": 0.0, "w_orders": 20.0, "w_items": 44.0, "w_aov": 51.3, "w_ito": 2.2, "w_asp": 23.3, "w_cr": 0.4, "w_tdr": 8.3, "w_pc2pct": 64.4, "w_pc2": 660.4, "w_pc2tgt": 0.0, "w_new_cust": 20.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 4479.0, "w_coupon": 0.0}, "SUMWON - Men": {"d": "Sumwon Men", "sr": 328749.0, "sp": 126840.0, "spp": 38.6, "wr": 895.0, "wp": 522.0, "wpp": 58.4, "us": 19086.0, "uw": 40.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 521942.0, "cvd": 191.0, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 128857.0, "sp": 47814.0, "spp": 37.1, "wr": 0, "wp": 0, "wpp": 0, "us": 9110.0, "uw": 0, "hrt": null, "hrn": null, "skl": 0, "ivw": 363385.0, "cvd": 279.2, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 24783.0, "sp": 8530.0, "spp": 34.4, "wr": 143.0, "wp": 70.0, "wpp": 49.2, "us": 1430.0, "uw": 9.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 69970.0, "cvd": 340.4, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 115144.0, "sp": 48709.0, "spp": 42.3, "wr": 12092.0, "wp": 6698.0, "wpp": 55.4, "us": 6524.0, "uw": 617.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 137547.0, "cvd": 134.8, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 391751.0, "sp": 163477.0, "spp": 41.7, "wr": 7520.0, "wp": 4272.0, "wpp": 56.8, "us": 21174.0, "uw": 429.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 315547.0, "cvd": 102.2, "w_rev": 703.0, "w_rev_ar": 703.0, "w_tgt": 38.0, "w_tgt_cr": 1850.1, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 16.3, "w_cac_dm": 0.0, "w_orders": 9.0, "w_items": 41.0, "w_aov": 78.1, "w_ito": 4.6, "w_asp": 17.1, "w_cr": 0.3, "w_tdr": 22.8, "w_pc2pct": 51.8, "w_pc2": 364.1, "w_pc2tgt": 25.4, "w_new_cust": 9.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 3341.0, "w_coupon": 147.1}, "KSTM": {"d": "KSTM", "sr": 153960.0, "sp": 62223.0, "spp": 40.4, "wr": 11466.0, "wp": 6553.0, "wpp": 57.2, "us": 8735.0, "uw": 514.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 177705.0, "cvd": 134.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}}};
+
+var ALL_WEEKS = RAW.weeks.slice(0, -1); // drop W27 partial
+var BRANDS = RAW.brands;
+var HR_WK = "2026-W22";
+var MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+var GROUPS = [
+  // Missguided group
+  {lbl:"Missguided Total", ids:["MISSGUIDED","MISSGUIDED - Playboy"], sub:true, children:[
+    {id:"MISSGUIDED",           d:"Missguided"},
+    {id:"MISSGUIDED - Playboy", d:"Playboy x MSG"}
+  ]},
+  // Sumwon group - nested
+  {lbl:"Sumwon Total", sub:true, isNested:true,
+    subgroups:[
+      {lbl:"Sumwon Men Total", ids:["SUMWON - Men","SUMWON - Playboy"], sub:true, children:[
+        {id:"SUMWON - Men",     d:"Sumwon Men"},
+        {id:"SUMWON - Playboy", d:"Playboy x SWM"}
+      ]},
+      {id:"SUMWON - Women", d:"Sumwon Women"},
+      {id:"SUMWON - Kids",  d:"Sumwon Kids"}
+    ]
+  },
+  // Individual brands
+  {lbl:"AiiRZ",    ids:["AiiRZ"],    solo:true},
+  {lbl:"Baby Phat",ids:["BABYPHAT"], solo:true},
+  {lbl:"KIZN",     ids:["KIZN"],     solo:true},
+  {lbl:"KSTM",     ids:["KSTM"],     solo:true}
+];
+
+var WEB_SITES = [
+  {id:"MISSGUIDED",    name:"Missguided"},
+  {id:"AiiRZ",         name:"AiiRZ"},
+  {id:"KIZN",          name:"KIZN"},
+  {id:"SUMWON - Women",name:"Sumwon Studios"}
+];
+
+var S = {view:"week", wi:ALL_WEEKS.length-1, mi:0, fx:1, sym:"$"};
+
+// ── UTILS ──────────────────────────────────────────────
+function gw(i){ return ALL_WEEKS[Math.max(0, Math.min(ALL_WEEKS.length-1, i))]; }
+function bd(wk){ return RAW.data[wk] || {}; }
+function wkLbl(w){ var p=w.split("-"); return p[1]+" · "+p[0]; }
+
+function fM(v){
+  if(v==null || isNaN(v)) return "<span class='na'>-</span>";
+  var x=v*S.fx, s=S.sym;
+  if(Math.abs(x)>=1000000) return s+(x/1000000).toFixed(2)+"M";
+  if(Math.abs(x)>=1000)    return s+Math.round(x/1000)+"K";
+  return s+Math.round(x).toLocaleString();
+}
+function fP(v,d){ d=d||1; return (v==null||isNaN(v)) ? "<span class='na'>-</span>" : v.toFixed(d)+"%"; }
+function fR(v){ return (v==null||isNaN(v)) ? "<span class='na'>-</span>" : v.toFixed(2)+"x"; }
+function fN(v){ return (v==null||isNaN(v)) ? "<span class='na'>-</span>" : Math.round(v).toLocaleString(); }
+function fD(v){ return (v==null||isNaN(v)) ? "<span class='na'>-</span>" : v.toFixed(1)+"D"; }
+function fX(v,d){ d=d||2; return (v==null||isNaN(v)) ? "<span class='na'>-</span>" : S.sym+(v*S.fx).toFixed(d); }
+
+function ww(c,p){ return (!p || p===0) ? null : (c-p)/p*100; }
+
+function dT(v, sfx, dp){
+  sfx=sfx||"%"; dp=dp||1;
+  if(v==null||isNaN(v)) return "<span class='fl'>-</span>";
+  var a=Math.abs(v).toFixed(dp);
+  if(v>0.4)  return "<span class='up'>&#9650; "+a+sfx+"</span>";
+  if(v<-0.4) return "<span class='dn'>&#9660; "+a+sfx+"</span>";
+  return "<span class='fl'>&#8594; "+a+sfx+"</span>";
+}
+function dPP(v){ return dT(v,"pp"); }
+
+function bdg(v){
+  if(v==null||isNaN(v)) return "";
+  var a=Math.abs(v).toFixed(1)+"%";
+  if(v>1)  return "<span class='bg bgg'>&#9650; "+a+"</span>";
+  if(v<-1) return "<span class='bg bgr'>&#9660; "+a+"</span>";
+  return "<span class='bg bgf'>Flat</span>";
+}
+
+function pgBar(pct){
+  if(pct==null) return "<span class='na'>-</span>";
+  var w=Math.min(pct,100);
+  var cls=(pct>=80)?"":"(pct>=60)?'am':'rd'";
+  var fillCls = pct>=80 ? "" : pct>=60 ? "am" : "rd";
+  return "<div class='pgbar'><div class='pgbar-track'><div class='pgbar-fill "+fillCls+"' style='width:"+w.toFixed(0)+"%'></div></div><span style='font-size:10px'>"+pct.toFixed(0)+"%</span></div>";
+}
+
+function ragC(v){ if(v==null)return "ra"; if(v>1)return "rg"; if(v<-5)return "rr"; return "ra"; }
+function rd(c){ return "<span class='rag "+c+"'></span>"; }
+
+// ── MONTH GROUPS ────────────────────────────────────────
+function getMonths(){
+  var seen={}, list=[];
+  ALL_WEEKS.forEach(function(w){
+    var parts=w.split("-W");
+    var yr=parseInt(parts[0]), wn=parseInt(parts[1]);
+    var mn=Math.ceil(wn/4.33);
+    var key=yr+"-"+mn;
+    if(!seen[key]){
+      seen[key]=true;
+      list.push({key:key,yr:yr,mn:mn,
+        label:MN[Math.min(mn-1,11)]+" "+yr,
+        weeks:[]});
+    }
+    list[list.length-1].weeks.push(w);
+  });
+  S.mi = Math.max(0, Math.min(S.mi, list.length-1));
+  return list;
+}
+
+// ── AGGREGATE ───────────────────────────────────────────
+function aggWks(wklist){
+  var out={};
+  BRANDS.forEach(function(id){
+    var sr=0,sp=0,wr=0,wp=0,w_rev=0,w_spend=0,w_orders=0,w_pc2=0,w_new=0,w_roas_s=0,w_roas_n=0;
+    var latest={};
+    wklist.forEach(function(w){
+      var r=(RAW.data[w] && RAW.data[w][id]) ? RAW.data[w][id] : {};
+      sr+=r.sr||0; sp+=r.sp||0; wr+=r.wr||0; wp+=r.wp||0;
+      w_rev+=(r.w_rev||0); w_spend+=(r.w_spend||0);
+      w_orders+=(r.w_orders||0); w_pc2+=(r.w_pc2||0); w_new+=(r.w_new_cust||0);
+      if(r.w_roas){ w_roas_s+=r.w_roas; w_roas_n++; }
+      latest=r;
+    });
+    out[id]={
+      d:latest.d||id, sr:sr, sp:sp, spp:sr?sp/sr*100:0,
+      wr:wr, wp:wp, wpp:wr?wp/wr*100:0,
+      w_rev:w_rev, w_spend:w_spend, w_orders:w_orders,
+      w_pc2:w_pc2, w_pc2pct:w_rev?w_pc2/w_rev*100:null,
+      w_new:w_new, w_roas:w_roas_n?w_roas_s/w_roas_n:null,
+      // carry latest-week fields for CAC, ITO, AOV, CR etc
+      w_cac:latest.w_cac, w_cac_dm:latest.w_cac_dm,
+      w_ito:latest.w_ito, w_aov:latest.w_aov, w_cr:latest.w_cr,
+      w_tdr:latest.w_tdr, w_roas_ar:latest.w_roas_ar,
+      w_tgt:latest.w_tgt, w_tgt_cr:latest.w_tgt_cr,
+      w_users:latest.w_users,
+      hrt:latest.hrt, hrn:latest.hrn, skl:latest.skl,
+      cvd:latest.cvd, ivw:latest.ivw
+    };
+  });
+  return out;
+}
+
+// ── GET VIEW DATA ────────────────────────────────────────
+function getView(){
+  if(S.view==="week"){
+    var cw=gw(S.wi), pw=gw(S.wi-1);
+    return {cw:cw,pw:pw,cb:bd(cw),pb:bd(pw),lbl:wkLbl(cw),plbl:wkLbl(pw)};
+  }
+  if(S.view==="month"){
+    var months=getMonths();
+    var m=months[S.mi], pm=months[Math.max(0,S.mi-1)];
+    return {cw:m.weeks[m.weeks.length-1],cb:aggWks(m.weeks),pb:aggWks(pm.weeks),
+      lbl:m.label+" (MTD)",plbl:pm.label};
+  }
+  // YTD
+  return {cw:ALL_WEEKS[ALL_WEEKS.length-1],cb:aggWks(ALL_WEEKS),pb:aggWks(ALL_WEEKS.slice(0,3)),
+    lbl:"2026 YTD",plbl:"Prior Reference"};
+}
+
+// ── BUILD PERIOD DROPDOWN ────────────────────────────────
+function buildPeriodDrop(){
+  var sel=document.getElementById("sel-period");
+  sel.innerHTML="";
+  if(S.view==="week"){
+    for(var i=ALL_WEEKS.length-1;i>=0;i--){
+      var o=document.createElement("option");
+      o.value=i; o.textContent=wkLbl(ALL_WEEKS[i]);
+      if(i===S.wi) o.selected=true;
+      sel.appendChild(o);
+    }
+  } else if(S.view==="month"){
+    var months=getMonths();
+    for(var j=months.length-1;j>=0;j--){
+      var o2=document.createElement("option");
+      o2.value=j; o2.textContent=months[j].label;
+      if(j===S.mi) o2.selected=true;
+      sel.appendChild(o2);
+    }
+  } else {
+    var o3=document.createElement("option");
+    o3.value=0; o3.textContent="2026 YTD"; o3.selected=true;
+    sel.appendChild(o3);
+  }
+}
+
+// ── PORTFOLIO TOTALS ─────────────────────────────────────
+function calcTotals(cb,pb){
+  var t={sr:0,sp:0,wr:0,wp:0,psr:0,pwr:0,ppsp:0,
+    w_rev:0,w_spend:0,w_orders:0,w_pc2:0,w_new:0,
+    pw_rev:0,hrs:0,hrc:0};
+  BRANDS.forEach(function(id){
+    var r=cb[id]||{}, p=pb[id]||{};
+    t.sr+=r.sr||0; t.sp+=r.sp||0; t.wr+=r.wr||0; t.wp+=r.wp||0;
+    t.psr+=p.sr||0; t.pwr+=p.wr||0; t.ppsp+=p.sp||0;
+    t.w_rev+=r.w_rev||0; t.w_spend+=r.w_spend||0;
+    t.w_orders+=r.w_orders||0; t.w_pc2+=r.w_pc2||0; t.w_new+=r.w_new||0;
+    t.pw_rev+=p.w_rev||0;
+    var hb=(RAW.data[HR_WK]&&RAW.data[HR_WK][id])?RAW.data[HR_WK][id]:{};
+    if(hb.hrt!=null){ t.hrs+=hb.hrt; t.hrc++; }
+  });
+  t.trev=t.sr+t.wr; t.prev=t.psr+t.pwr;
+  t.tpc2=t.sr?t.sp/t.sr*100:0; t.ppc2=t.psr?t.ppsp/t.psr*100:0;
+  t.web_roas=t.w_spend?t.w_rev/t.w_spend:null;
+  t.phr=t.hrc?t.hrs/t.hrc:null;
+  return t;
+}
+
+// ── RENDER ────────────────────────────────────────────────
+function render(){
+  try {
+    var v=getView(), t=calcTotals(v.cb,v.pb);
+    var cb=v.cb, pb=v.pb, lbl=v.lbl, plbl=v.plbl;
+
+    document.getElementById("ph-wk").textContent=lbl;
+    document.getElementById("ph-dt").textContent="vs "+plbl;
+    document.getElementById("ph-title").textContent="Performance Dashboard";
+
+    var fxEl=document.getElementById("sel-fx");
+    S.fx=parseFloat(fxEl.value);
+    S.sym=fxEl.options[fxEl.selectedIndex].getAttribute("data-sym");
+
+    var h="";
+
+    // TOTAL PERFORMANCE KPIs
+    h+="<div class='slbl'>Total Performance (SHEIN + Webshop)</div>";
+    h+="<div class='krow krow5'>";
+    h+="<div class='kpi hl'><div class='kl'>Total Revenue</div><div class='kv'>"+fM(t.sr+t.wr+t.w_rev)+"</div><div class='ks'>"+bdg(ww(t.sr+t.wr+t.w_rev,t.psr+t.pwr+t.pw_rev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>Total PC2%</div><div class='kv'>"+fP((t.sr+t.wr+t.w_rev)>0?(t.sp+t.wp+t.w_pc2)/(t.sr+t.wr+t.w_rev)*100:0)+"</div><div class='ks'><span class='fl'>Combined channels</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>Total Orders (Webshop)</div><div class='kv'>"+fN(t.w_orders)+"</div><div class='ks'><span class='fl'>All webshop sites</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>New Customers</div><div class='kv'>"+fN(t.w_new)+"</div><div class='ks'><span class='fl'>Webshop</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>Avg Hit Rate (W22)</div><div class='kv'>"+(t.phr!=null?fP(t.phr):"-")+"</div><div class='ks'><span class='fl'>2-31D cohort</span></div></div>";
+    h+="</div>";
+
+    // SHEIN KPIs
+    h+="<div class='slbl'>SHEIN Performance</div>";
+    h+="<div class='krow krow4'>";
+    h+="<div class='kpi hl'><div class='kl'>SHEIN Revenue</div><div class='kv'>"+fM(t.sr)+"</div><div class='ks'>"+bdg(ww(t.sr,t.psr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>Platform Revenue</div><div class='kv'>"+fM(t.wr)+"</div><div class='ks'>"+bdg(ww(t.wr,t.pwr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>SHEIN PC2%</div><div class='kv'>"+fP(t.tpc2)+"</div><div class='ks'>"+dPP(t.tpc2-t.ppc2)+"<span class='fl'>vs "+plbl+"</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>Platform PC2%</div><div class='kv'>"+fP(t.wr?t.wp/t.wr*100:0)+"</div><div class='ks'><span class='fl'>Platform channel</span></div></div>";
+    h+="</div>";
+
+    // WEBSHOP KPIs
+    var msg=cb["MISSGUIDED"]||{};
+    var tot_new=BRANDS.reduce(function(a,id){return a+((cb[id]&&cb[id].w_new_cust)||0);},0);
+    var tot_ret=BRANDS.reduce(function(a,id){return a+((cb[id]&&cb[id].w_ret_cust)||0);},0);
+    var tot_users=BRANDS.reduce(function(a,id){return a+((cb[id]&&cb[id].w_users)||0);},0);
+    h+="<div class='slbl'>Webshop Performance</div>";
+    h+="<div class='krow krow6'>";
+    h+="<div class='kpi hl'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(t.w_rev)+"</div><div class='ks'>"+bdg(ww(t.w_rev,t.pw_rev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>Marketing Spend</div><div class='kv'>"+fM(t.w_spend)+"</div><div class='ks'><span class='fl'>All sites</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>ROAS</div><div class='kv'>"+(t.web_roas!=null?fR(t.web_roas):"-")+"</div><div class='ks'><span class='fl'>Revenue / Spend</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>CAC</div><div class='kv'>"+(msg.w_cac!=null?S.sym+msg.w_cac.toFixed(2):"-")+"</div><div class='ks'><span class='fl'>Digital: "+(msg.w_cac_dm!=null?S.sym+msg.w_cac_dm.toFixed(2):"-")+"</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>Active Customers</div><div class='kv'>"+fN(tot_users)+"</div><div class='ks'><span class='fl'>New: "+fN(tot_new)+" &nbsp;Return: "+fN(tot_ret)+"</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>Webshop PC2%</div><div class='kv'>"+(t.w_rev?fP(t.w_pc2/t.w_rev*100):"-")+"</div><div class='ks'><span class='fl'>Before returns</span></div></div>";
+    h+="</div>";
+
+    h+="<div class='cgrid'>";
+    h+=buildRevSummary(cb,pb,t,lbl,plbl);
+    h+=buildBrandTable(cb,pb,t,lbl,plbl);
+    h+=buildWebshopTable(cb,pb,lbl,plbl);
+    h+=buildMerch(cb,lbl);
+    h+="</div>";
+
+    h+="<div style='margin-top:16px;padding:10px 0;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--text3);border-top:1px solid var(--border)'>";
+    h+="<span>Source: SHEIN Trade W15-W26 2026 &middot; Webshop (27 metrics) &middot; Hit rate up to "+wkLbl(HR_WK)+" &middot; Sumwon Studios Internal</span>";
+    h+="<div style='display:flex;gap:14px;align-items:center'>";
+    h+="<span style='display:flex;align-items:center;gap:4px'><span class='rag rg'></span>WoW &gt; +2%</span>";
+    h+="<span style='display:flex;align-items:center;gap:4px'><span class='rag ra'></span>Watch</span>";
+    h+="<span style='display:flex;align-items:center;gap:4px'><span class='rag rr'></span>WoW &lt; -5%</span>";
+    h+="</div></div>";
+
+    document.getElementById("app").innerHTML=h;
+    buildPeriodDrop();
+
+  } catch(e) {
+    document.getElementById("app").innerHTML="<div style='padding:20px;color:red;font-size:13px;background:#fff;margin:20px;border-radius:8px;border:1px solid #f09595'>"+
+      "<strong>Dashboard Error:</strong> "+e.message+"<br><small>"+e.stack+"</small></div>";
+  }
+}
+
+// ── BUILD SECTIONS ────────────────────────────────────────
+
+function buildRevSummary(cb,pb,t,lbl,plbl){
+  var w_rev_p=BRANDS.reduce(function(a,id){return a+((pb[id]&&pb[id].w_rev)||0);},0);
+  var h="<div class='card'>";
+  h+="<div class='chdr'><span class='ct'>Revenue Summary</span><span class='cm'>"+lbl+"</span></div>";
+  h+="<div class='bxrow'>";
+
+  // Box 1: SHEIN
+  h+="<div class='bx'><div class='bxh'>SHEIN + Platform Revenue</div>";
+  h+="<table><thead><tr><th>Channel</th><th>Revenue</th><th>vs "+plbl+"</th><th>PC2%</th></tr></thead><tbody>";
+  h+="<tr><td>SHEIN</td><td>"+fM(t.sr)+"</td><td>"+dT(ww(t.sr,t.psr))+"</td><td>"+fP(t.tpc2)+"</td></tr>";
+  h+="<tr><td>Platform</td><td>"+fM(t.wr)+"</td><td>"+dT(ww(t.wr,t.pwr))+"</td><td>"+fP(t.wr?t.wp/t.wr*100:0)+"</td></tr>";
+  h+="<tr><td>Total</td><td>"+fM(t.trev)+"</td><td>"+dT(ww(t.trev,t.prev))+"</td><td>"+fP(t.trev?(t.sp+t.wp)/t.trev*100:0)+"</td></tr>";
+  h+="</tbody></table></div>";
+
+  // Box 2: Webshop by site
+  h+="<div class='bx'><div class='bxh'>Webshop Revenue by Site</div>";
+  h+="<table><thead><tr><th>Site</th><th>Revenue</th><th>vs "+plbl+"</th><th>vs Target</th></tr></thead><tbody>";
+  WEB_SITES.forEach(function(ws){
+    var r=cb[ws.id]||{}, p=pb[ws.id]||{};
+    h+="<tr><td>"+ws.name+"</td><td>"+fM(r.w_rev)+"</td><td>"+dT(ww(r.w_rev,p.w_rev))+"</td><td>"+pgBar(r.w_tgt_cr)+"</td></tr>";
+  });
+  h+="<tr><td>Total</td><td>"+fM(t.w_rev)+"</td><td>"+dT(ww(t.w_rev,w_rev_p))+"</td><td>-</td></tr>";
+  h+="</tbody></table></div>";
+
+  // Box 3: PC2 + ROAS
+  h+="<div class='bx'><div class='bxh'>PC2% &amp; ROAS by Site</div>";
+  h+="<table><thead><tr><th>Site</th><th>PC2%</th><th>PC2 vs Tgt</th><th>ROAS</th></tr></thead><tbody>";
+  WEB_SITES.forEach(function(ws){
+    var r=cb[ws.id]||{};
+    var pc2tgt=r.w_pc2!=null&&r.w_pc2tgt?r.w_pc2/r.w_pc2tgt*100:null;
+    h+="<tr><td>"+ws.name+"</td><td>"+fP(r.w_pc2pct)+"</td><td>"+pgBar(pc2tgt)+"</td><td>"+fR(r.w_roas)+"</td></tr>";
+  });
+  h+="<tr><td>Portfolio</td><td>"+fP(t.w_rev?t.w_pc2/t.w_rev*100:null)+"</td><td>-</td><td>"+fR(t.web_roas)+"</td></tr>";
+  h+="</tbody></table></div>";
+
+  h+="</div></div>";
+  return h;
+}
+
+function buildBrandTable(cb,pb,t,lbl,plbl){
+  var h="<div class='card'>";
+  h+="<div class='chdr'><span class='ct'>SHEIN + Platform - Brand Performance</span><span class='cm'>"+lbl+"</span></div>";
+  h+="<div class='tw'><table class='W'>";
+  h+="<thead><tr><th class='bc' rowspan='2'>Brand</th>";
+  h+="<th class='gh' colspan='3'>SHEIN</th>";
+  h+="<th class='gh' colspan='2'>Platform</th>";
+  h+="<th class='gh' colspan='2'>Combined</th></tr>";
+  h+="<tr><th class='gl'>Revenue</th><th>vs "+plbl+"</th><th class='gr'>PC2%</th>";
+  h+="<th class='gl'>Revenue</th><th class='gr'>vs "+plbl+"</th>";
+  h+="<th>Revenue</th><th>vs "+plbl+"</th></tr></thead><tbody>";
+
+  var grandSR=0,grandSP=0,grandWR=0,grandWP=0,grandPSR=0,grandPWR=0;
+
+  function brandRow(id, label, indent, r, p) {
+    var sw=ww(r.sr,p.sr);
+    var indCls = indent ? " ind" : "";
+    var out="<tr><td class='bc"+indCls+"'>"+rd(ragC(sw))+label+"</td>";
+    out+="<td class='gl'>"+fM(r.sr)+"</td><td>"+dT(sw)+"</td><td class='gr'>"+fP(r.spp)+"</td>";
+    out+="<td class='gl'>"+fM(r.wr)+"</td><td class='gr'>"+dT(ww(r.wr,p.wr))+"</td>";
+    out+="<td>"+fM((r.sr||0)+(r.wr||0))+"</td><td>"+dT(ww((r.sr||0)+(r.wr||0),(p.sr||0)+(p.wr||0)))+"</td></tr>";
+    return out;
+  }
+  function subtotalRow(label, sr, sp, wr, wp, psr2, pwr2, cls) {
+    cls = cls || "sub";
+    var out="<tr class='"+cls+"'><td class='bc'>"+label+"</td>";
+    out+="<td class='gl'>"+fM(sr)+"</td><td>"+dT(ww(sr,psr2))+"</td><td class='gr'>"+fP(sr?sp/sr*100:0)+"</td>";
+    out+="<td class='gl'>"+fM(wr)+"</td><td class='gr'>"+dT(ww(wr,pwr2))+"</td>";
+    out+="<td>"+fM(sr+wr)+"</td><td>"+dT(ww(sr+wr,psr2+pwr2))+"</td></tr>";
+    return out;
+  }
+  function sumIds(ids, src) {
+    var sr=0,sp=0,wr=0,wp=0;
+    ids.forEach(function(id){ var r=src[id]||{}; sr+=r.sr||0;sp+=r.sp||0;wr+=r.wr||0;wp+=r.wp||0; });
+    return {sr:sr,sp:sp,wr:wr,wp:wp};
+  }
+
+  // ── MISSGUIDED GROUP ──────────────────────────────────────
+  var msgIds = ["MISSGUIDED","MISSGUIDED - Playboy"];
+  var msgLabels = {"MISSGUIDED":"Missguided","MISSGUIDED - Playboy":"Playboy x MSG"};
+  msgIds.forEach(function(id){ h+=brandRow(id, msgLabels[id], true, cb[id]||{}, pb[id]||{}); });
+  var msgC=sumIds(msgIds,cb), msgP=sumIds(msgIds,pb);
+  h+=subtotalRow("Missguided Total", msgC.sr,msgC.sp,msgC.wr,msgC.wp,msgP.sr,msgP.wr);
+  grandSR+=msgC.sr;grandSP+=msgC.sp;grandWR+=msgC.wr;grandWP+=msgC.wp;grandPSR+=msgP.sr;grandPWR+=msgP.wr;
+
+  // ── SUMWON MEN SUB-GROUP ──────────────────────────────────
+  var smenIds = ["SUMWON - Men","SUMWON - Playboy"];
+  var smenLabels = {"SUMWON - Men":"Sumwon Men","SUMWON - Playboy":"Playboy x SWM"};
+  smenIds.forEach(function(id){ h+=brandRow(id, smenLabels[id], true, cb[id]||{}, pb[id]||{}); });
+  var smenC=sumIds(smenIds,cb), smenP=sumIds(smenIds,pb);
+  h+=subtotalRow("Sumwon Men Total", smenC.sr,smenC.sp,smenC.wr,smenC.wp,smenP.sr,smenP.wr);
+
+  // Sumwon Women + Kids as individual rows
+  var swIds = ["SUMWON - Women","SUMWON - Kids"];
+  var swLabels = {"SUMWON - Women":"Sumwon Women","SUMWON - Kids":"Sumwon Kids"};
+  swIds.forEach(function(id){ h+=brandRow(id, swLabels[id], true, cb[id]||{}, pb[id]||{}); });
+
+  // Sumwon Total = Men Total + Women + Kids
+  var sumwonAllIds = smenIds.concat(swIds);
+  var sumwonC=sumIds(sumwonAllIds,cb), sumwonP=sumIds(sumwonAllIds,pb);
+  h+=subtotalRow("Sumwon Total", sumwonC.sr,sumwonC.sp,sumwonC.wr,sumwonC.wp,sumwonP.sr,sumwonP.wr);
+  grandSR+=sumwonC.sr;grandSP+=sumwonC.sp;grandWR+=sumwonC.wr;grandWP+=sumwonC.wp;grandPSR+=sumwonP.sr;grandPWR+=sumwonP.wr;
+
+  // ── INDIVIDUAL BRANDS ────────────────────────────────────
+  var indivBrands = [
+    {id:"AiiRZ",   lbl:"AiiRZ"},
+    {id:"BABYPHAT",lbl:"Baby Phat"},
+    {id:"KIZN",    lbl:"KIZN"},
+    {id:"KSTM",    lbl:"KSTM"}
+  ];
+  indivBrands.forEach(function(b){
+    var r=cb[b.id]||{},p=pb[b.id]||{};
+    grandSR+=r.sr||0;grandSP+=r.sp||0;grandWR+=r.wr||0;grandWP+=r.wp||0;grandPSR+=p.sr||0;grandPWR+=p.wr||0;
+    h+=subtotalRow(rd(ragC(ww(r.sr,p.sr)))+b.lbl, r.sr,r.sp,r.wr,r.wp,p.sr,p.wr);
+  });
+
+  // ── PORTFOLIO TOTAL ──────────────────────────────────────
+  h+=subtotalRow("Portfolio Total",grandSR,grandSP,grandWR,grandWP,grandPSR,grandPWR,"tot");
+
+  h+="</tbody></table></div></div>";
+  return h;
+}
+
+function buildWebshopTable(cb,pb,lbl,plbl){
+  var h="<div class='card'>";
+  h+="<div class='chdr'><span class='ct'>Webshop Performance</span><span class='cm'>"+lbl+" &middot; Revenue &middot; ROAS &middot; CAC &middot; ITO &middot; CR%</span></div>";
+  h+="<div class='tw'><table class='W'>";
+  h+="<thead><tr><th class='bc' rowspan='2'>Site</th>";
+  h+="<th class='gh' colspan='4'>Revenue</th>";
+  h+="<th class='gh' colspan='3'>Marketing Efficiency</th>";
+  h+="<th class='gh' colspan='2'>Acquisition</th>";
+  h+="<th class='gh' colspan='5'>Trading Metrics</th>";
+  h+="<th class='gh' colspan='3'>Customers</th></tr>";
+  h+="<tr><th class='gl'>Revenue</th><th>vs "+plbl+"</th><th>vs Target</th><th class='gr'>PC2%</th>";
+  h+="<th class='gl'>Spend</th><th>ROAS (BR)</th><th class='gr'>ROAS (AR)</th>";
+  h+="<th class='gl'>CAC</th><th class='gr'>CAC (DM)</th>";
+  h+="<th class='gl'>Orders</th><th>AOV</th><th>ITO</th><th>CR%</th><th class='gr'>TDR%</th>";
+  h+="<th class='gl'>Active Cust.</th><th>New Cust.</th><th class='gr'>Returning</th></tr></thead><tbody>";
+
+  var t_rev=0,t_spend=0,t_ord=0,t_pc2=0,p_rev=0;
+
+  WEB_SITES.forEach(function(ws){
+    var r=cb[ws.id]||{}, p=pb[ws.id]||{};
+    t_rev+=r.w_rev||0; t_spend+=r.w_spend||0; t_ord+=r.w_orders||0; t_pc2+=r.w_pc2||0; p_rev+=p.w_rev||0;
+    h+="<tr><td class='bc'>"+rd(ragC(ww(r.w_rev,p.w_rev)))+ws.name+"</td>";
+    h+="<td class='gl'>"+fM(r.w_rev)+"</td><td>"+dT(ww(r.w_rev,p.w_rev))+"</td><td>"+pgBar(r.w_tgt_cr)+"</td><td class='gr'>"+fP(r.w_pc2pct)+"</td>";
+    h+="<td class='gl'>"+fM(r.w_spend)+"</td><td>"+fR(r.w_roas)+"</td><td class='gr'>"+fR(r.w_roas_ar)+"</td>";
+    h+="<td class='gl'>"+fX(r.w_cac)+"</td><td class='gr'>"+fX(r.w_cac_dm)+"</td>";
+    h+="<td class='gl'>"+fN(r.w_orders)+"</td><td>"+fX(r.w_aov)+"</td><td>"+(r.w_ito!=null?r.w_ito.toFixed(1)+"x":"-")+"</td><td>"+fP(r.w_cr)+"</td><td class='gr'>"+fP(r.w_tdr)+"</td>";
+    h+="<td class='gl'>"+fN(r.w_users)+"</td><td>"+fN(r.w_new_cust)+"</td><td class='gr'>"+fN(r.w_ret_cust)+"</td>";
+    h+="</tr>";
+  });
+
+  var tot_roas=t_spend?t_rev/t_spend:null;
+  h+="<tr class='tot'><td class='bc'>Total Webshop</td>";
+  h+="<td class='gl'>"+fM(t_rev)+"</td><td>"+dT(ww(t_rev,p_rev))+"</td><td>-</td><td class='gr'>"+fP(t_rev?t_pc2/t_rev*100:null)+"</td>";
+  h+="<td class='gl'>"+fM(t_spend)+"</td><td>"+fR(tot_roas)+"</td><td class='gr'>-</td>";
+  h+="<td class='gl'>-</td><td class='gr'>-</td>";
+  var tot_users2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_users)||0);},0);
+  var tot_new2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_new_cust)||0);},0);
+  var tot_ret2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_ret_cust)||0);},0);
+  h+="<td class='gl'>"+fN(t_ord)+"</td><td>-</td><td>-</td><td>-</td><td class='gr'>-</td>";
+  h+="<td class='gl'>"+fN(tot_users2)+"</td><td>"+fN(tot_new2)+"</td><td class='gr'>"+fN(tot_ret2)+"</td>";
+  h+="</tr></tbody></table></div></div>";
+  return h;
+}
+
+function buildMerch(cb,lbl){
+  var hb=RAW.data[HR_WK]||{};
+  var h="<div class='card'>";
+  h+="<div class='chdr'><span class='ct'>Merch - Hit Rate & Inventory</span>";
+  h+="<span class='cnote'>Hit rate: "+wkLbl(HR_WK)+" cohort (2-31D) - Cover days: current week</span></div>";
+  h+="<div class='tw'><table class='W'><thead><tr>";
+  h+="<th class='bc'>Brand</th>";
+  h+="<th class='gl'>HR New (2-31D)</th><th>HR Total (2-31D)</th>";
+  h+="<th class='gr'>SKCs Launched</th><th class='gl'>Cover Days</th><th>Inv Units (WH)</th></tr></thead><tbody>";
+
+  // Flat list matching new brand groupings
+  var MERCH_ROWS = [
+    // Missguided group
+    {id:"MISSGUIDED",           lbl:"Missguided",       indent:true},
+    {id:"MISSGUIDED - Playboy", lbl:"Playboy x MSG",    indent:true},
+    {ids:["MISSGUIDED","MISSGUIDED - Playboy"], lbl:"Missguided Total", subtotal:true},
+    // Sumwon Men sub-group
+    {id:"SUMWON - Men",         lbl:"Sumwon Men",       indent:true},
+    {id:"SUMWON - Playboy",     lbl:"Playboy x SWM",    indent:true},
+    {ids:["SUMWON - Men","SUMWON - Playboy"], lbl:"Sumwon Men Total", subtotal:true},
+    // Sumwon Women + Kids
+    {id:"SUMWON - Women",       lbl:"Sumwon Women",     indent:true},
+    {id:"SUMWON - Kids",        lbl:"Sumwon Kids",      indent:true},
+    // Sumwon Total
+    {ids:["SUMWON - Men","SUMWON - Playboy","SUMWON - Women","SUMWON - Kids"], lbl:"Sumwon Total", subtotal:true},
+    // Individual brands
+    {id:"AiiRZ",    lbl:"AiiRZ",     solo:true},
+    {id:"BABYPHAT", lbl:"Baby Phat", solo:true},
+    {id:"KIZN",     lbl:"KIZN",      solo:true},
+    {id:"KSTM",     lbl:"KSTM",      solo:true}
+  ];
+
+  var allIds = ["MISSGUIDED","MISSGUIDED - Playboy","SUMWON - Men","SUMWON - Playboy",
+                "SUMWON - Women","SUMWON - Kids","AiiRZ","BABYPHAT","KIZN","KSTM"];
+  var th=0,tn=0,tc=0,tl=0;
+
+  MERCH_ROWS.forEach(function(row){
+    if(row.subtotal) {
+      // aggregate subtotal across ids
+      var hn=0,hhn=0,htt=0,htn=0,skl=0,cv=0,cvn=0;
+      row.ids.forEach(function(id){
+        var hbr=hb[id]||{}, c=cb[id]||{};
+        if(hbr.hrn!=null){hn+=hbr.hrn;hhn++;}
+        if(hbr.hrt!=null){htt+=hbr.hrt;htn++;}
+        skl+=hbr.skl||0;
+        if(c.cvd!=null){cv+=c.cvd;cvn++;}
+      });
+      h+="<tr class='sub'><td class='bc'>"+row.lbl+"</td>";
+      h+="<td class='gl'>"+fP(hhn?hn/hhn:null)+"</td>";
+      h+="<td>"+fP(htn?htt/htn:null)+"</td>";
+      h+="<td class='gr'>"+fN(skl)+"</td>";
+      h+="<td class='gl'>"+(cvn?Math.round(cv/cvn)+"D":"-")+"</td>";
+      h+="<td>-</td></tr>";
+    } else {
+      var id=row.id, hbr=hb[id]||{}, c=cb[id]||{};
+      var cls = row.solo ? "sub" : "";
+      var indentStyle = row.indent ? " style='padding-left:22px;color:var(--text3);font-weight:400'" : "";
+      h+="<tr"+(cls?" class='"+cls+"'":"")+">";
+      h+="<td class='bc'"+indentStyle+">"+row.lbl+"</td>";
+      h+="<td class='gl'>"+fP(hbr.hrn)+"</td>";
+      h+="<td>"+fP(hbr.hrt)+"</td>";
+      h+="<td class='gr'>"+fN(hbr.skl)+"</td>";
+      h+="<td class='gl'>"+fD(c.cvd)+"</td>";
+      h+="<td>"+fN(c.ivw)+"</td></tr>";
+      // accumulate portfolio totals for non-subtotal rows
+      if(!row.subtotal){
+        if(hbr.hrn!=null){tn+=hbr.hrn;tl++;}
+        if(hbr.hrt!=null){th+=hbr.hrt;tc++;}
+      }
+    }
+  });
+
+  h+="<tr class='tot'><td class='bc'>Portfolio Total</td>";
+  h+="<td class='gl'>"+fP(tl?tn/tl:null)+"</td>";
+  h+="<td>"+fP(tc?th/tc:null)+"</td>";
+  h+="<td class='gr'>-</td><td class='gl'>-</td><td>-</td></tr>";
+  h+="</tbody></table></div></div>";
+  return h;
+}
+
+function buildRevSummary(cb,pb,t,lbl,plbl){
+  var w_rev_p=BRANDS.reduce(function(a,id){return a+((pb[id]&&pb[id].w_rev)||0);},0);
+  var h="<div class='card'>";
+  h+="<div class='chdr'><span class='ct'>Revenue Summary</span><span class='cm'>"+lbl+"</span></div>";
+  h+="<div class='bxrow'>";
+
+  // Box 1: SHEIN
+  h+="<div class='bx'><div class='bxh'>SHEIN + Platform Revenue</div>";
+  h+="<table><thead><tr><th>Channel</th><th>Revenue</th><th>vs "+plbl+"</th><th>PC2%</th></tr></thead><tbody>";
+  h+="<tr><td>SHEIN</td><td>"+fM(t.sr)+"</td><td>"+dT(ww(t.sr,t.psr))+"</td><td>"+fP(t.tpc2)+"</td></tr>";
+  h+="<tr><td>Platform</td><td>"+fM(t.wr)+"</td><td>"+dT(ww(t.wr,t.pwr))+"</td><td>"+fP(t.wr?t.wp/t.wr*100:0)+"</td></tr>";
+  h+="<tr><td>Total</td><td>"+fM(t.trev)+"</td><td>"+dT(ww(t.trev,t.prev))+"</td><td>"+fP(t.trev?(t.sp+t.wp)/t.trev*100:0)+"</td></tr>";
+  h+="</tbody></table></div>";
+
+  // Box 2: Webshop by site
+  h+="<div class='bx'><div class='bxh'>Webshop Revenue by Site</div>";
+  h+="<table><thead><tr><th>Site</th><th>Revenue</th><th>vs "+plbl+"</th><th>vs Target</th></tr></thead><tbody>";
+  WEB_SITES.forEach(function(ws){
+    var r=cb[ws.id]||{}, p=pb[ws.id]||{};
+    h+="<tr><td>"+ws.name+"</td><td>"+fM(r.w_rev)+"</td><td>"+dT(ww(r.w_rev,p.w_rev))+"</td><td>"+pgBar(r.w_tgt_cr)+"</td></tr>";
+  });
+  h+="<tr><td>Total</td><td>"+fM(t.w_rev)+"</td><td>"+dT(ww(t.w_rev,w_rev_p))+"</td><td>-</td></tr>";
+  h+="</tbody></table></div>";
+
+  // Box 3: PC2 + ROAS
+  h+="<div class='bx'><div class='bxh'>PC2% &amp; ROAS by Site</div>";
+  h+="<table><thead><tr><th>Site</th><th>PC2%</th><th>PC2 vs Tgt</th><th>ROAS</th></tr></thead><tbody>";
+  WEB_SITES.forEach(function(ws){
+    var r=cb[ws.id]||{};
+    var pc2tgt=r.w_pc2!=null&&r.w_pc2tgt?r.w_pc2/r.w_pc2tgt*100:null;
+    h+="<tr><td>"+ws.name+"</td><td>"+fP(r.w_pc2pct)+"</td><td>"+pgBar(pc2tgt)+"</td><td>"+fR(r.w_roas)+"</td></tr>";
+  });
+  h+="<tr><td>Portfolio</td><td>"+fP(t.w_rev?t.w_pc2/t.w_rev*100:null)+"</td><td>-</td><td>"+fR(t.web_roas)+"</td></tr>";
+  h+="</tbody></table></div>";
+
+  h+="</div></div>";
+  return h;
+}
+
+function buildBrandTable(cb,pb,t,lbl,plbl){
+  var h="<div class='card'>";
+  h+="<div class='chdr'><span class='ct'>SHEIN + Platform - Brand Performance</span><span class='cm'>"+lbl+"</span></div>";
+  h+="<div class='tw'><table class='W'>";
+  h+="<thead><tr><th class='bc' rowspan='2'>Brand</th>";
+  h+="<th class='gh' colspan='3'>SHEIN</th>";
+  h+="<th class='gh' colspan='2'>Platform</th>";
+  h+="<th class='gh' colspan='2'>Combined</th></tr>";
+  h+="<tr><th class='gl'>Revenue</th><th>vs "+plbl+"</th><th class='gr'>PC2%</th>";
+  h+="<th class='gl'>Revenue</th><th class='gr'>vs "+plbl+"</th>";
+  h+="<th>Revenue</th><th>vs "+plbl+"</th></tr></thead><tbody>";
+
+  var grandSR=0,grandSP=0,grandWR=0,grandWP=0,grandPSR=0,grandPWR=0;
+
+  function brandRow(id, label, indent, r, p) {
+    var sw=ww(r.sr,p.sr);
+    var indCls = indent ? " ind" : "";
+    var out="<tr><td class='bc"+indCls+"'>"+rd(ragC(sw))+label+"</td>";
+    out+="<td class='gl'>"+fM(r.sr)+"</td><td>"+dT(sw)+"</td><td class='gr'>"+fP(r.spp)+"</td>";
+    out+="<td class='gl'>"+fM(r.wr)+"</td><td class='gr'>"+dT(ww(r.wr,p.wr))+"</td>";
+    out+="<td>"+fM((r.sr||0)+(r.wr||0))+"</td><td>"+dT(ww((r.sr||0)+(r.wr||0),(p.sr||0)+(p.wr||0)))+"</td></tr>";
+    return out;
+  }
+  function subtotalRow(label, sr, sp, wr, wp, psr2, pwr2, cls) {
+    cls = cls || "sub";
+    var out="<tr class='"+cls+"'><td class='bc'>"+label+"</td>";
+    out+="<td class='gl'>"+fM(sr)+"</td><td>"+dT(ww(sr,psr2))+"</td><td class='gr'>"+fP(sr?sp/sr*100:0)+"</td>";
+    out+="<td class='gl'>"+fM(wr)+"</td><td class='gr'>"+dT(ww(wr,pwr2))+"</td>";
+    out+="<td>"+fM(sr+wr)+"</td><td>"+dT(ww(sr+wr,psr2+pwr2))+"</td></tr>";
+    return out;
+  }
+  function sumIds(ids, src) {
+    var sr=0,sp=0,wr=0,wp=0;
+    ids.forEach(function(id){ var r=src[id]||{}; sr+=r.sr||0;sp+=r.sp||0;wr+=r.wr||0;wp+=r.wp||0; });
+    return {sr:sr,sp:sp,wr:wr,wp:wp};
+  }
+
+  // ── MISSGUIDED GROUP ──────────────────────────────────────
+  var msgIds = ["MISSGUIDED","MISSGUIDED - Playboy"];
+  var msgLabels = {"MISSGUIDED":"Missguided","MISSGUIDED - Playboy":"Playboy x MSG"};
+  msgIds.forEach(function(id){ h+=brandRow(id, msgLabels[id], true, cb[id]||{}, pb[id]||{}); });
+  var msgC=sumIds(msgIds,cb), msgP=sumIds(msgIds,pb);
+  h+=subtotalRow("Missguided Total", msgC.sr,msgC.sp,msgC.wr,msgC.wp,msgP.sr,msgP.wr);
+  grandSR+=msgC.sr;grandSP+=msgC.sp;grandWR+=msgC.wr;grandWP+=msgC.wp;grandPSR+=msgP.sr;grandPWR+=msgP.wr;
+
+  // ── SUMWON MEN SUB-GROUP ──────────────────────────────────
+  var smenIds = ["SUMWON - Men","SUMWON - Playboy"];
+  var smenLabels = {"SUMWON - Men":"Sumwon Men","SUMWON - Playboy":"Playboy x SWM"};
+  smenIds.forEach(function(id){ h+=brandRow(id, smenLabels[id], true, cb[id]||{}, pb[id]||{}); });
+  var smenC=sumIds(smenIds,cb), smenP=sumIds(smenIds,pb);
+  h+=subtotalRow("Sumwon Men Total", smenC.sr,smenC.sp,smenC.wr,smenC.wp,smenP.sr,smenP.wr);
+
+  // Sumwon Women + Kids as individual rows
+  var swIds = ["SUMWON - Women","SUMWON - Kids"];
+  var swLabels = {"SUMWON - Women":"Sumwon Women","SUMWON - Kids":"Sumwon Kids"};
+  swIds.forEach(function(id){ h+=brandRow(id, swLabels[id], true, cb[id]||{}, pb[id]||{}); });
+
+  // Sumwon Total = Men Total + Women + Kids
+  var sumwonAllIds = smenIds.concat(swIds);
+  var sumwonC=sumIds(sumwonAllIds,cb), sumwonP=sumIds(sumwonAllIds,pb);
+  h+=subtotalRow("Sumwon Total", sumwonC.sr,sumwonC.sp,sumwonC.wr,sumwonC.wp,sumwonP.sr,sumwonP.wr);
+  grandSR+=sumwonC.sr;grandSP+=sumwonC.sp;grandWR+=sumwonC.wr;grandWP+=sumwonC.wp;grandPSR+=sumwonP.sr;grandPWR+=sumwonP.wr;
+
+  // ── INDIVIDUAL BRANDS ────────────────────────────────────
+  var indivBrands = [
+    {id:"AiiRZ",   lbl:"AiiRZ"},
+    {id:"BABYPHAT",lbl:"Baby Phat"},
+    {id:"KIZN",    lbl:"KIZN"},
+    {id:"KSTM",    lbl:"KSTM"}
+  ];
+  indivBrands.forEach(function(b){
+    var r=cb[b.id]||{},p=pb[b.id]||{};
+    grandSR+=r.sr||0;grandSP+=r.sp||0;grandWR+=r.wr||0;grandWP+=r.wp||0;grandPSR+=p.sr||0;grandPWR+=p.wr||0;
+    h+=subtotalRow(rd(ragC(ww(r.sr,p.sr)))+b.lbl, r.sr,r.sp,r.wr,r.wp,p.sr,p.wr);
+  });
+
+  // ── PORTFOLIO TOTAL ──────────────────────────────────────
+  h+=subtotalRow("Portfolio Total",grandSR,grandSP,grandWR,grandWP,grandPSR,grandPWR,"tot");
+
+  h+="</tbody></table></div></div>";
+  return h;
+}
+
+function buildWebshopTable(cb,pb,lbl,plbl){
+  var h="<div class='card'>";
+  h+="<div class='chdr'><span class='ct'>Webshop Performance</span><span class='cm'>"+lbl+" &middot; Revenue &middot; ROAS &middot; CAC &middot; ITO &middot; CR%</span></div>";
+  h+="<div class='tw'><table class='W'>";
+  h+="<thead><tr><th class='bc' rowspan='2'>Site</th>";
+  h+="<th class='gh' colspan='4'>Revenue</th>";
+  h+="<th class='gh' colspan='3'>Marketing Efficiency</th>";
+  h+="<th class='gh' colspan='2'>Acquisition</th>";
+  h+="<th class='gh' colspan='5'>Trading Metrics</th>";
+  h+="<th class='gh' colspan='3'>Customers</th></tr>";
+  h+="<tr><th class='gl'>Revenue</th><th>vs "+plbl+"</th><th>vs Target</th><th class='gr'>PC2%</th>";
+  h+="<th class='gl'>Spend</th><th>ROAS (BR)</th><th class='gr'>ROAS (AR)</th>";
+  h+="<th class='gl'>CAC</th><th class='gr'>CAC (DM)</th>";
+  h+="<th class='gl'>Orders</th><th>AOV</th><th>ITO</th><th>CR%</th><th class='gr'>TDR%</th>";
+  h+="<th class='gl'>Active Cust.</th><th>New Cust.</th><th class='gr'>Returning</th></tr></thead><tbody>";
+
+  var t_rev=0,t_spend=0,t_ord=0,t_pc2=0,p_rev=0;
+
+  WEB_SITES.forEach(function(ws){
+    var r=cb[ws.id]||{}, p=pb[ws.id]||{};
+    t_rev+=r.w_rev||0; t_spend+=r.w_spend||0; t_ord+=r.w_orders||0; t_pc2+=r.w_pc2||0; p_rev+=p.w_rev||0;
+    h+="<tr><td class='bc'>"+rd(ragC(ww(r.w_rev,p.w_rev)))+ws.name+"</td>";
+    h+="<td class='gl'>"+fM(r.w_rev)+"</td><td>"+dT(ww(r.w_rev,p.w_rev))+"</td><td>"+pgBar(r.w_tgt_cr)+"</td><td class='gr'>"+fP(r.w_pc2pct)+"</td>";
+    h+="<td class='gl'>"+fM(r.w_spend)+"</td><td>"+fR(r.w_roas)+"</td><td class='gr'>"+fR(r.w_roas_ar)+"</td>";
+    h+="<td class='gl'>"+fX(r.w_cac)+"</td><td class='gr'>"+fX(r.w_cac_dm)+"</td>";
+    h+="<td class='gl'>"+fN(r.w_orders)+"</td><td>"+fX(r.w_aov)+"</td><td>"+(r.w_ito!=null?r.w_ito.toFixed(1)+"x":"-")+"</td><td>"+fP(r.w_cr)+"</td><td class='gr'>"+fP(r.w_tdr)+"</td>";
+    h+="<td class='gl'>"+fN(r.w_users)+"</td><td>"+fN(r.w_new_cust)+"</td><td class='gr'>"+fN(r.w_ret_cust)+"</td>";
+    h+="</tr>";
+  });
+
+  var tot_roas=t_spend?t_rev/t_spend:null;
+  h+="<tr class='tot'><td class='bc'>Total Webshop</td>";
+  h+="<td class='gl'>"+fM(t_rev)+"</td><td>"+dT(ww(t_rev,p_rev))+"</td><td>-</td><td class='gr'>"+fP(t_rev?t_pc2/t_rev*100:null)+"</td>";
+  h+="<td class='gl'>"+fM(t_spend)+"</td><td>"+fR(tot_roas)+"</td><td class='gr'>-</td>";
+  h+="<td class='gl'>-</td><td class='gr'>-</td>";
+  var tot_users2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_users)||0);},0);
+  var tot_new2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_new_cust)||0);},0);
+  var tot_ret2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_ret_cust)||0);},0);
+  h+="<td class='gl'>"+fN(t_ord)+"</td><td>-</td><td>-</td><td>-</td><td class='gr'>-</td>";
+  h+="<td class='gl'>"+fN(tot_users2)+"</td><td>"+fN(tot_new2)+"</td><td class='gr'>"+fN(tot_ret2)+"</td>";
+  h+="</tr></tbody></table></div></div>";
+  return h;
+}
+
+function buildMerch(cb,lbl){
+  var hb=RAW.data[HR_WK]||{};
+  var h="<div class='card'>";
+  h+="<div class='chdr'><span class='ct'>Merch - Hit Rate &amp; Inventory</span>";
+  h+="<span class='cnote'>Hit rate: "+wkLbl(HR_WK)+" cohort (2-31D) &middot; Cover days: current week</span></div>";
+  h+="<div class='tw'><table class='W'><thead><tr>";
+  h+="<th class='bc'>Brand</th><th class='gl'>HR New (2-31D)</th><th>HR Total (2-31D)</th>";
+  h+="<th class='gr'>SKCs Launched</th><th class='gl'>Cover Days</th><th>Inv Units (WH)</th></tr></thead><tbody>";
+
+  var th2=0,tn2=0,tc2=0,tl2=0;
+
+  GROUPS.forEach(function(g){
+    if(!g.solo){
+      g.ids.forEach(function(id){
+        var hbr=hb[id]||{}, c=cb[id]||{};
+        h+="<tr><td class='bc ind'><span style='color:var(--text3);font-weight:400'>"+(c.d||id)+"</span></td>";
+        h+="<td class='gl'>"+fP(hbr.hrn)+"</td><td>"+fP(hbr.hrt)+"</td>";
+        h+="<td class='gr'>"+fN(hbr.skl)+"</td><td class='gl'>"+fD(c.cvd)+"</td><td>"+fN(c.ivw)+"</td></tr>";
+      });
+      var hn=0,hhn=0,htt=0,htn=0,skl=0,cv=0,cvn=0;
+      g.ids.forEach(function(id){
+        var hbr=hb[id]||{},c=cb[id]||{};
+        if(hbr.hrn!=null){hn+=hbr.hrn;hhn++;}
+        if(hbr.hrt!=null){htt+=hbr.hrt;htn++;}
+        skl+=hbr.skl||0;
+        if(c.cvd!=null){cv+=c.cvd;cvn++;}
+      });
+      th2+=htt;tc2+=htn;tn2+=hn;tl2+=hhn;
+      h+="<tr class='sub'><td class='bc'>"+g.lbl+"</td>";
+      h+="<td class='gl'>"+fP(hhn?hn/hhn:null)+"</td><td>"+fP(htn?htt/htn:null)+"</td>";
+      h+="<td class='gr'>"+fN(skl)+"</td><td class='gl'>"+(cvn?Math.round(cv/cvn)+"D":"-")+"</td><td>-</td></tr>";
+    } else {
+      var id2=g.ids[0], hbr2=hb[id2]||{}, c2=cb[id2]||{};
+      th2+=hbr2.hrt||0; tc2+=hbr2.hrt!=null?1:0; tn2+=hbr2.hrn||0; tl2+=hbr2.hrn!=null?1:0;
+      h+="<tr class='sub'><td class='bc'>"+g.lbl+"</td>";
+      h+="<td class='gl'>"+fP(hbr2.hrn)+"</td><td>"+fP(hbr2.hrt)+"</td>";
+      h+="<td class='gr'>"+fN(hbr2.skl)+"</td><td class='gl'>"+fD(c2.cvd)+"</td><td>"+fN(c2.ivw)+"</td></tr>";
+    }
+  });
+
+  h+="<tr class='tot'><td class='bc'>Portfolio</td>";
+  h+="<td class='gl'>"+fP(tl2?tn2/tl2:null)+"</td><td>"+fP(tc2?th2/tc2:null)+"</td>";
+  h+="<td class='gr'>-</td><td class='gl'>-</td><td>-</td></tr>";
+  h+="</tbody></table></div></div>";
+  return h;
+}
+
+// ── CONTROLS ─────────────────────────────────────────────
+document.querySelectorAll(".vtab").forEach(function(t){
+  t.addEventListener("click", function(){
+    document.querySelectorAll(".vtab").forEach(function(x){ x.classList.remove("active"); });
+    t.classList.add("active");
+    S.view=t.getAttribute("data-v");
+    if(S.view==="week") S.wi=ALL_WEEKS.length-1;
+    if(S.view==="month"){ var m=getMonths(); S.mi=m.length-1; }
+    render();
+  });
+});
+
+document.getElementById("sel-period").addEventListener("change", function(e){
+  if(S.view==="week") S.wi=parseInt(e.target.value);
+  else if(S.view==="month") S.mi=parseInt(e.target.value);
+  render();
+});
+
+document.getElementById("sel-fx").addEventListener("change", render);
+
+function toast(m){
+  var t=document.getElementById("toast");
+  t.textContent=m; t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); }, 3200);
+}
+document.getElementById("btn-pdf").addEventListener("click", function(){
+  toast("Opening print dialog - select A4 Landscape...");
+  setTimeout(function(){ window.print(); }, 400);
+});
+document.getElementById("btn-send").addEventListener("click", function(){
+  toast("\u2713 Scorecard sent to CEO");
+});
+
+// Init
+buildPeriodDrop();
+render();
+
+})();
+</script>
+</body>
+</html>
