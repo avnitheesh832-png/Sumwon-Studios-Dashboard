@@ -178,7 +178,6 @@ table.W tr:not(.sub):not(.tot):hover td{background:#EEF3FB}
 
 var RAW = null;
 
-// Fetch data from API
 fetch("/api/data")
   .then(function(r){ return r.json(); })
   .then(function(d){
@@ -187,13 +186,14 @@ fetch("/api/data")
     BRANDS = RAW.brands;
     HR_WK = RAW.hr_wk || "2026-W22";
     S.wi = ALL_WEEKS.length - 1;
-    var el=document.getElementById("data-status"); if(el) el.textContent=(RAW.updated||"")+" · "+ALL_WEEKS.length+" weeks";
+    var el=document.getElementById("data-status");
+    if(el) el.textContent=(RAW.updated||"")+" · "+ALL_WEEKS.length+" weeks";
     buildPeriodDrop();
     render();
   })
   .catch(function(e){
     document.getElementById("app").innerHTML =
-      "<div style='padding:20px;color:#A82222;background:#fff;margin:20px;border-radius:8px;border:1px solid #f09595'><strong>Error loading data:</strong> "+e.message+"<br><small>Try refreshing or re-uploading files at /upload</small></div>";
+      "<div style='padding:20px;color:#A82222;background:#fff;margin:20px;border-radius:8px;border:1px solid #f09595'><strong>Error loading data:</strong> "+e.message+"<br><small>Refresh or re-upload at /upload</small></div>";
   });_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Kids": {"d": "Sumwon Kids", "sr": 128857.0, "sp": 47814.0, "spp": 37.1, "wr": 0, "wp": 0, "wpp": 0, "us": 9110.0, "uw": 0, "hrt": null, "hrn": null, "skl": 0, "ivw": 363385.0, "cvd": 279.2, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "SUMWON - Playboy": {"d": "Playboy \u00d7 SWM", "sr": 24783.0, "sp": 8530.0, "spp": 34.4, "wr": 143.0, "wp": 70.0, "wpp": 49.2, "us": 1430.0, "uw": 9.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 69970.0, "cvd": 340.4, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "BABYPHAT": {"d": "Baby Phat", "sr": 115144.0, "sp": 48709.0, "spp": 42.3, "wr": 12092.0, "wp": 6698.0, "wpp": 55.4, "us": 6524.0, "uw": 617.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 137547.0, "cvd": 134.8, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}, "KIZN": {"d": "KIZN", "sr": 391751.0, "sp": 163477.0, "spp": 41.7, "wr": 7520.0, "wp": 4272.0, "wpp": 56.8, "us": 21174.0, "uw": 429.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 315547.0, "cvd": 102.2, "w_rev": 703.0, "w_rev_ar": 703.0, "w_tgt": 38.0, "w_tgt_cr": 1850.1, "w_spend": 0.0, "w_roas": null, "w_roas_ar": null, "w_cac": 16.3, "w_cac_dm": 0.0, "w_orders": 9.0, "w_items": 41.0, "w_aov": 78.1, "w_ito": 4.6, "w_asp": 17.1, "w_cr": 0.3, "w_tdr": 22.8, "w_pc2pct": 51.8, "w_pc2": 364.1, "w_pc2tgt": 25.4, "w_new_cust": 9.0, "w_ret_cust": 0.0, "w_ret_pct": 0.0, "w_users": 3341.0, "w_coupon": 147.1}, "KSTM": {"d": "KSTM", "sr": 153960.0, "sp": 62223.0, "spp": 40.4, "wr": 11466.0, "wp": 6553.0, "wpp": 57.2, "us": 8735.0, "uw": 514.0, "hrt": null, "hrn": null, "skl": 0, "ivw": 177705.0, "cvd": 134.5, "w_rev": null, "w_rev_ar": null, "w_tgt": null, "w_tgt_cr": null, "w_spend": null, "w_roas": null, "w_roas_ar": null, "w_cac": null, "w_cac_dm": null, "w_orders": null, "w_items": null, "w_aov": null, "w_ito": null, "w_asp": null, "w_cr": null, "w_tdr": null, "w_pc2pct": null, "w_pc2": null, "w_pc2tgt": null, "w_new_cust": null, "w_ret_cust": null, "w_ret_pct": null, "w_users": null, "w_coupon": null}}}};
 
 var ALL_WEEKS = [];
@@ -389,7 +389,7 @@ function calcTotals(cb,pb){
     t.sr+=r.sr||0; t.sp+=r.sp||0; t.wr+=r.wr||0; t.wp+=r.wp||0;
     t.psr+=p.sr||0; t.pwr+=p.wr||0; t.ppsp+=p.sp||0;
     t.w_rev+=r.w_rev||0; t.w_spend+=r.w_spend||0;
-    t.w_orders+=r.w_orders||0; t.w_pc2+=r.w_pc2||0; t.w_new+=r.w_new||0;
+    t.w_orders+=r.w_orders||0; t.w_pc2+=r.w_pc2||0; t.w_new+=r.w_new_cust||0;
     t.pw_rev+=p.w_rev||0;
     var hb=(RAW.data[HR_WK]&&RAW.data[HR_WK][id])?RAW.data[HR_WK][id]:{};
     if(hb.hrt!=null){ t.hrs+=hb.hrt; t.hrc++; }
@@ -422,8 +422,11 @@ function render(){
     h+="<div class='krow krow5'>";
     h+="<div class='kpi hl'><div class='kl'>Total Revenue</div><div class='kv'>"+fM(t.sr+t.wr+t.w_rev)+"</div><div class='ks'>"+bdg(ww(t.sr+t.wr+t.w_rev,t.psr+t.pwr+t.pw_rev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>Total PC2%</div><div class='kv'>"+fP((t.sr+t.wr+t.w_rev)>0?(t.sp+t.wp+t.w_pc2)/(t.sr+t.wr+t.w_rev)*100:0)+"</div><div class='ks'><span class='fl'>Combined channels</span></div></div>";
-    h+="<div class='kpi'><div class='kl'>Total Orders (Webshop)</div><div class='kv'>"+fN(t.w_orders)+"</div><div class='ks'><span class='fl'>All webshop sites</span></div></div>";
-    h+="<div class='kpi'><div class='kl'>New Customers</div><div class='kv'>"+fN(t.w_new)+"</div><div class='ks'><span class='fl'>Webshop</span></div></div>";
+    var totOrders=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_orders)||0);},0);
+    var totNew=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_new_cust)||0);},0);
+    var totRet=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_ret_cust)||0);},0);
+    h+="<div class='kpi'><div class='kl'>Total Orders (Webshop)</div><div class='kv'>"+fN(totOrders)+"</div><div class='ks'><span class='fl'>All webshop sites</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>New Customers</div><div class='kv'>"+fN(totNew)+"</div><div class='ks'><span class='fl'>Returning: "+fN(totRet)+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>Avg Hit Rate (W22)</div><div class='kv'>"+(t.phr!=null?fP(t.phr):"-")+"</div><div class='ks'><span class='fl'>2-31D cohort</span></div></div>";
     h+="</div>";
 
@@ -447,13 +450,15 @@ function render(){
 
     // WEBSHOP KPIs
     var msg=cb["MISSGUIDED"]||{};
-    var tot_new=BRANDS.reduce(function(a,id){return a+((cb[id]&&cb[id].w_new_cust)||0);},0);
-    var tot_ret=BRANDS.reduce(function(a,id){return a+((cb[id]&&cb[id].w_ret_cust)||0);},0);
-    var tot_users=BRANDS.reduce(function(a,id){return a+((cb[id]&&cb[id].w_users)||0);},0);
+    var tot_new=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_new_cust)||0);},0);
+    var tot_ret=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_ret_cust)||0);},0);
+    var tot_users=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_users)||0);},0);
+    var tot_orders_web=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_orders)||0);},0);
     h+="<div class='slbl'>Webshop Performance</div>";
     h+="<div class='krow krow6'>";
     h+="<div class='kpi hl'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(t.w_rev)+"</div><div class='ks'>"+bdg(ww(t.w_rev,t.pw_rev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
-    h+="<div class='kpi'><div class='kl'>Marketing Spend</div><div class='kv'>"+fM(t.w_spend)+"</div><div class='ks'><span class='fl'>All sites</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>Orders</div><div class='kv'>"+fN(tot_orders_web)+"</div><div class='ks'><span class='fl'>All webshop sites</span></div></div>"+
+    "<div class='kpi'><div class='kl'>Marketing Spend</div><div class='kv'>"+fM(t.w_spend)+"</div><div class='ks'><span class='fl'>All sites</span></div></div>";
     h+="<div class='kpi'><div class='kl'>ROAS</div><div class='kv'>"+(t.web_roas!=null?fR(t.web_roas):"-")+"</div><div class='ks'><span class='fl'>Revenue / Spend</span></div></div>";
     h+="<div class='kpi'><div class='kl'>CAC</div><div class='kv'>"+(msg.w_cac!=null?S.sym+msg.w_cac.toFixed(2):"-")+"</div><div class='ks'><span class='fl'>Digital: "+(msg.w_cac_dm!=null?S.sym+msg.w_cac_dm.toFixed(2):"-")+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>Active Customers</div><div class='kv'>"+fN(tot_users)+"</div><div class='ks'><span class='fl'>New: "+fN(tot_new)+" &nbsp;Return: "+fN(tot_ret)+"</span></div></div>";
@@ -1024,7 +1029,7 @@ document.getElementById("btn-send").addEventListener("click", function(){
 });
 
 // Init
-// init happens after fetch above
+// init after fetch
 
 })();
 </script>
