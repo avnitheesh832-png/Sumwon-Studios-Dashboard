@@ -186,6 +186,9 @@ def process_files(table1_bytes, table2_bytes, cohort_bytes, webshop_bytes):
             iv = inv[wk][brand]
             hrt = round(h['h'] / h['l'] * 100, 1) if h['l'] else None
             hrn = round(h['nh'] / h['nl'] * 100, 1) if h['nl'] else None
+            r_launched = h['l'] - h['nl']
+            r_hits     = h['h'] - h['nh']
+            hrl = round(r_hits / r_launched * 100, 1) if r_launched else None
             cover = round(iv['ivw'] / (iv['units'] / 7), 1) if iv['units'] > 0 else None
 
             site_name = BRAND_TO_SITE.get(brand)
@@ -199,8 +202,8 @@ def process_files(table1_bytes, table2_bytes, cohort_bytes, webshop_bytes):
                 'wr':  round(s['wr'], 0),
                 'wp':  round(s['wp'], 0),
                 'wpp': round(s['wp'] / s['wr'] * 100, 1) if s['wr'] else 0,
-                'hrt': hrt, 'hrn': hrn,
-                'skl': round(h['l'], 0),
+                'hrt': hrt, 'hrn': hrn, 'hrl': hrl,
+                'skl': round(h['l'], 0), 'skl_n': round(h['nl'], 0), 'skl_r': round(r_launched, 0),
                 'ivw': round(iv['ivw'], 0),
                 'cvd': cover,
                 'w_rev':    wd.get('Net_sales_before_returns'),
