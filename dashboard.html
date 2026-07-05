@@ -504,7 +504,7 @@ function buildRevSummary(cb,pb,t,lbl,plbl){
   h+="<table><thead><tr><th>Channel</th><th>Revenue</th><th>vs "+plbl+"</th><th>PC2%</th></tr></thead><tbody>";
   h+="<tr><td>SHEIN</td><td>"+fM(t.sr)+"</td><td>"+dT(ww(t.sr,t.psr))+"</td><td>"+fP(t.tpc2)+"</td></tr>";
   h+="<tr><td>Webshop</td><td>"+fM(t.wr)+"</td><td>"+dT(ww(t.wr,t.pwr))+"</td><td>"+fP(t.wr?t.wp/t.wr*100:0)+"</td></tr>";
-  h+="<tr><td>Total</td><td>"+fM(totalRev)+"</td><td>"+dT(ww(totalRev,t.prev))+"</td><td>"+fP(totalPC2)+"</td></tr>";
+  h+="<tr><td>Total</td><td>"+fM(t.sr+t.wr)+"</td><td>"+dT(ww(t.sr+t.wr,t.psr+t.pwr))+"</td><td>"+fP((t.sr+t.wr)?(t.sp+t.wp)/(t.sr+t.wr)*100:0)+"</td></tr>";
   h+="</tbody></table></div>";
 
   // Box 2: Webshop by site
@@ -750,7 +750,7 @@ function buildRevSummary(cb,pb,t,lbl,plbl){
   h+="<table><thead><tr><th>Channel</th><th>Revenue</th><th>vs "+plbl+"</th><th>PC2%</th></tr></thead><tbody>";
   h+="<tr><td>SHEIN</td><td>"+fM(t.sr)+"</td><td>"+dT(ww(t.sr,t.psr))+"</td><td>"+fP(t.tpc2)+"</td></tr>";
   h+="<tr><td>Webshop</td><td>"+fM(t.wr)+"</td><td>"+dT(ww(t.wr,t.pwr))+"</td><td>"+fP(t.wr?t.wp/t.wr*100:0)+"</td></tr>";
-  h+="<tr><td>Total</td><td>"+fM(totalRev)+"</td><td>"+dT(ww(totalRev,t.prev))+"</td><td>"+fP(totalPC2)+"</td></tr>";
+  h+="<tr><td>Total</td><td>"+fM(t.sr+t.wr)+"</td><td>"+dT(ww(t.sr+t.wr,t.psr+t.pwr))+"</td><td>"+fP((t.sr+t.wr)?(t.sp+t.wp)/(t.sr+t.wr)*100:0)+"</td></tr>";
   h+="</tbody></table></div>";
 
   // Box 2: Webshop by site
