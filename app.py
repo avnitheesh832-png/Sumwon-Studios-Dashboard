@@ -5,22 +5,21 @@ Flask app: upload page + live dashboard
 import os
 import json
 from flask import (Flask, request, redirect, url_for,
-                   render_template, jsonify, session, send_from_directory)
+                   render_template, jsonify, session)
 from processor import process_files
 
 app = Flask(__name__, template_folder='.')
 app.secret_key = os.environ.get('SECRET_KEY', 'change-me-in-production')
 
-# Where to store processed data (Railway Volume mounts to /data)
 DATA_DIR  = os.environ.get('DATA_DIR', '/tmp/sumwon_data')
 DATA_FILE = os.path.join(DATA_DIR, 'dashboard_data.json')
 UPLOAD_PASSWORD = os.environ.get('UPLOAD_PASSWORD', 'sumwon2026')
 
 REQUIRED_FILES = {
-    'table1':   'Weekly_Trade_Table_1',
-    'table2':   'Weekly_Trade_Table_2',
-    'cohort':   'Weekly_Trade_Cohort',
-    'webshop':  'Webshop_per_Site_per_Week',
+    'table1':  'Weekly_Trade_Table_1',
+    'table2':  'Weekly_Trade_Table_2',
+    'cohort':  'Weekly_Trade_Cohort',
+    'webshop': 'Webshop_per_Site_per_Week',
 }
 
 
@@ -77,14 +76,12 @@ def upload():
     success = None
 
     if request.method == 'POST':
-        # Password check
         pwd = request.form.get('password', '')
         if pwd != UPLOAD_PASSWORD:
             error = 'Incorrect password.'
             return render_template('upload.html', error=error, success=None,
                                    has_data=data_exists())
 
-        # Check all 4 files present
         files = {}
         missing = []
         for key in REQUIRED_FILES:
@@ -99,19 +96,34 @@ def upload():
             return render_template('upload.html', error=error, success=None,
                                    has_data=data_exists())
 
-        # Process
         try:
-            data = process_files(
+            # Process new files
+            new_data = process_files(
                 table1_bytes  = files['table1'],
                 table2_bytes  = files['table2'],
                 cohort_bytes  = files['cohort'],
                 webshop_bytes = files['webshop'],
             )
-            save_data(data)
-            weeks = data.get('weeks', [])
+
+            # ── MERGE with existing data so past weeks are never lost ──
+            existing = load_data()
+            if existing and existing.get('data'):
+                merged = {}
+                merged.update(existing['data'])    # keep all historical weeks
+                merged.update(new_data['data'])    # new upload adds/updates weeks
+                all_wk_keys = sorted(
+                    merged.keys(),
+                    key=lambda x: (int(x.split('-')[0]), int(x.split('-W')[1]))
+                )
+                new_data['data']  = merged
+                new_data['weeks'] = all_wk_keys
+
+            save_data(new_data)
+            weeks = new_data.get('weeks', [])
             success = (f"Dashboard updated. "
                        f"{len(weeks)} weeks loaded "
                        f"({weeks[0]} to {weeks[-1]}).")
+
         except Exception as e:
             error = f"Processing error: {str(e)}"
 
@@ -122,7 +134,7 @@ def upload():
 @app.route('/upload/clear', methods=['POST'])
 def clear_data():
     pwd = request.form.get('password', '')
-    if pwd != UPLOAD_PASSWORD and not session.get('admin'):
+    if pwd != UPLOAD_PASSWORD:
         return redirect(url_for('upload'))
     if os.path.exists(DATA_FILE):
         os.remove(DATA_FILE)

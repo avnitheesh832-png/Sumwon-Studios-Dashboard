@@ -182,7 +182,7 @@ fetch("/api/data")
   .then(function(r){ return r.json(); })
   .then(function(d){
     RAW = d;
-    ALL_WEEKS = RAW.weeks.slice(0,-1);
+    ALL_WEEKS = RAW.weeks;
     BRANDS = RAW.brands;
     HR_WK = RAW.hr_wk || "2026-W22";
     S.wi = ALL_WEEKS.length - 1;
