@@ -133,6 +133,15 @@ def process_files(table1_bytes, table2_bytes, cohort_bytes, webshop_bytes):
         'SUMWON - Women': 'Sumwonstudios',
     }
 
+    # All webshop sites shown separately in the webshop section
+    WEB_SITE_NAMES = {
+        'Missguided':    'Missguided',
+        'SUMWON':        'Sumwon',
+        'Sumwonstudios': 'Sumwon Studios',
+        'KIZN':          'KIZN',
+        'AiiRZ':         'AiiRZ',
+    }
+
     web = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: None)))
     curr_site = None
     for r in ws[2:]:
@@ -230,11 +239,43 @@ def process_files(table1_bytes, table2_bytes, cohort_bytes, webshop_bytes):
                 'w_users':  wd.get('Active Users'),
             }
 
+    # Build webshop site data separately (each site as its own row)
+    webshop_sites_data = {}
+    for wk in sorted_wks:
+        webshop_sites_data[wk] = {}
+        for site_key, site_display in WEB_SITE_NAMES.items():
+            wd = web[wk].get(site_key, {})
+            webshop_sites_data[wk][site_key] = {
+                'display':    site_display,
+                'w_rev':      wd.get('Net_sales_before_returns'),
+                'w_rev_ar':   wd.get('Net_Sales_after_returns'),
+                'w_tgt':      wd.get('Net_sales_target'),
+                'w_tgt_cr':   wd.get('Net_sales target Completion Rate'),
+                'w_spend':    wd.get('Spending'),
+                'w_roas':     wd.get('ROAS_before_returns'),
+                'w_roas_ar':  wd.get('ROAS_after_returns'),
+                'w_cac':      wd.get('CAC'),
+                'w_cac_dm':   wd.get('CAC (Digital Marketing)'),
+                'w_orders':   wd.get('Orders'),
+                'w_aov':      wd.get('AOV'),
+                'w_ito':      wd.get('ITO'),
+                'w_cr':       wd.get('CR%'),
+                'w_tdr':      wd.get('TDR%'),
+                'w_pc2pct':   wd.get('PC_II%'),
+                'w_pc2':      wd.get('PC_II'),
+                'w_users':    wd.get('Active Users'),
+                'w_new_cust': wd.get('New_customers'),
+                'w_ret_cust': wd.get('Return_customers'),
+            }
+
     return {
-        'weeks':   sorted_wks,
-        'brands':  BRANDS,
-        'display': DISPLAY,
-        'hr_wk':   hr_wk or (sorted_wks[-3] if len(sorted_wks) >= 3 else sorted_wks[0]),
-        'updated': datetime.utcnow().strftime('%d %b %Y %H:%M UTC'),
-        'data':    data
+        'weeks':        sorted_wks,
+        'brands':       BRANDS,
+        'display':      DISPLAY,
+        'web_sites':    list(WEB_SITE_NAMES.keys()),
+        'web_display':  WEB_SITE_NAMES,
+        'hr_wk':        hr_wk or (sorted_wks[-3] if len(sorted_wks) >= 3 else sorted_wks[0]),
+        'updated':      datetime.utcnow().strftime('%d %b %Y %H:%M UTC'),
+        'data':         data,
+        'webshop':      webshop_sites_data,
     }

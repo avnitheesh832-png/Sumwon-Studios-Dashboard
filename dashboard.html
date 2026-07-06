@@ -186,6 +186,11 @@ fetch("/api/data")
     BRANDS = RAW.brands;
     HR_WK = RAW.hr_wk || "2026-W22";
     S.wi = ALL_WEEKS.length - 1;
+    if(RAW.web_sites && RAW.web_display) {
+      WEB_SITES = RAW.web_sites.map(function(id){
+        return {id:id, name:RAW.web_display[id]||id};
+      });
+    }
     var el=document.getElementById("data-status");
     if(el) el.textContent=(RAW.updated||"")+" · "+ALL_WEEKS.length+" weeks";
     buildPeriodDrop();
@@ -226,10 +231,11 @@ var GROUPS = [
 ];
 
 var WEB_SITES = [
-  {id:"MISSGUIDED",    name:"Missguided"},
-  {id:"AiiRZ",         name:"AiiRZ"},
+  {id:"Missguided",    name:"Missguided"},
+  {id:"SUMWON",        name:"Sumwon"},
+  {id:"Sumwonstudios", name:"Sumwon Studios"},
   {id:"KIZN",          name:"KIZN"},
-  {id:"SUMWON - Women",name:"Sumwon Studios"}
+  {id:"AiiRZ",         name:"AiiRZ"}
 ];
 
 var S = {view:"week", wi:ALL_WEEKS.length-1, mi:0, fx:1, sym:"$"};
@@ -405,6 +411,7 @@ function calcTotals(cb,pb){
 function render(){
   try {
     var v=getView(), t=calcTotals(v.cb,v.pb);
+    var _cWk=v.cw, prevWk=v.pw;
     var cb=v.cb, pb=v.pb, lbl=v.lbl, plbl=v.plbl;
 
     document.getElementById("ph-wk").textContent=lbl;
@@ -423,9 +430,10 @@ function render(){
     h+="<div class='kpi hl'><div class='kl'>Total Revenue</div><div class='kv'>"+fM(t.sr+t.wr)+"</div><div class='ks'>"+bdg(ww(t.sr+t.wr,t.psr+t.pwr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>SHEIN Revenue</div><div class='kv'>"+fM(t.sr)+"</div><div class='ks'>"+bdg(ww(t.sr,t.psr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(t.wr)+"</div><div class='ks'>"+bdg(ww(t.wr,t.pwr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
-    var totOrders=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_orders)||0);},0);
-    var totNew=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_new_cust)||0);},0);
-    var totRet=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_ret_cust)||0);},0);
+    var _cWk=ALL_WEEKS[S.view==="week"?S.wi:ALL_WEEKS.length-1];
+    var totOrders=WEB_SITES.reduce(function(a,ws){var r=getWsSite(_cWk,ws.id);return a+(r.w_orders||0);},0);
+    var totNew=WEB_SITES.reduce(function(a,ws){var r=getWsSite(_cWk,ws.id);return a+(r.w_new_cust||0);},0);
+    var totRet=WEB_SITES.reduce(function(a,ws){var r=getWsSite(_cWk,ws.id);return a+(r.w_ret_cust||0);},0);
     h+="<div class='kpi'><div class='kl'>Total Orders (Webshop)</div><div class='kv'>"+fN(totOrders)+"</div><div class='ks'><span class='fl'>All webshop sites</span></div></div>";
     h+="<div class='kpi'><div class='kl'>New Customers</div><div class='kv'>"+fN(totNew)+"</div><div class='ks'><span class='fl'>Returning: "+fN(totRet)+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>Avg Hit Rate (W22)</div><div class='kv'>"+(t.phr!=null?fP(t.phr):"-")+"</div><div class='ks'><span class='fl'>2-31D cohort</span></div></div>";
@@ -451,10 +459,10 @@ function render(){
 
     // WEBSHOP KPIs
     var msg=cb["MISSGUIDED"]||{};
-    var tot_new=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_new_cust)||0);},0);
-    var tot_ret=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_ret_cust)||0);},0);
-    var tot_users=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_users)||0);},0);
-    var tot_orders_web=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_orders)||0);},0);
+    var tot_new=BRANDS.reduce(function(a,id){return a+((cb[id]&&cb[id].w_new_cust)||0);},0);
+    var tot_ret=BRANDS.reduce(function(a,id){return a+((cb[id]&&cb[id].w_ret_cust)||0);},0);
+    var tot_users=WEB_SITES.reduce(function(a,ws){var r=getWsSite(_cWk,ws.id);return a+(r.w_users||0);},0);
+    var tot_orders_web=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_orders)||0);},0);
     h+="<div class='slbl'>Webshop Performance</div>";
     h+="<div class='krow krow6'>";
     h+="<div class='kpi hl'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(t.wr)+"</div><div class='ks'>"+bdg(ww(t.wr,t.pwr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
@@ -511,7 +519,7 @@ function buildRevSummary(cb,pb,t,lbl,plbl){
   h+="<div class='bx'><div class='bxh'>Webshop Revenue by Site</div>";
   h+="<table><thead><tr><th>Site</th><th>Revenue</th><th>vs "+plbl+"</th><th>vs Target</th></tr></thead><tbody>";
   WEB_SITES.forEach(function(ws){
-    var r=cb[ws.id]||{}, p=pb[ws.id]||{};
+    var r=getWsSite(_cWk,ws.id), p=getWsSite(prevWk,ws.id);
     h+="<tr><td>"+ws.name+"</td><td>"+fM(r.w_rev)+"</td><td>"+dT(ww(r.w_rev,p.w_rev))+"</td><td>"+pgBar(r.w_tgt_cr)+"</td></tr>";
   });
   h+="<tr><td>Total</td><td>"+fM(t.w_rev)+"</td><td>"+dT(ww(t.w_rev,w_rev_p))+"</td><td>-</td></tr>";
@@ -521,7 +529,7 @@ function buildRevSummary(cb,pb,t,lbl,plbl){
   h+="<div class='bx'><div class='bxh'>PC2% &amp; ROAS by Site</div>";
   h+="<table><thead><tr><th>Site</th><th>PC2%</th><th>PC2 vs Tgt</th><th>ROAS</th></tr></thead><tbody>";
   WEB_SITES.forEach(function(ws){
-    var r=cb[ws.id]||{};
+    var r=getWsSite(_cWk,ws.id);
     var pc2tgt=r.w_pc2!=null&&r.w_pc2tgt?r.w_pc2/r.w_pc2tgt*100:null;
     h+="<tr><td>"+ws.name+"</td><td>"+fP(r.w_pc2pct)+"</td><td>"+pgBar(pc2tgt)+"</td><td>"+fR(r.w_roas)+"</td></tr>";
   });
@@ -615,6 +623,17 @@ function buildBrandTable(cb,pb,t,lbl,plbl){
   return h;
 }
 
+function getWsSite(wk, siteId) {
+  if(RAW.webshop && RAW.webshop[wk] && RAW.webshop[wk][siteId]) {
+    return RAW.webshop[wk][siteId];
+  }
+  return {};
+}
+function getWsSitePrev(wi, siteId) {
+  var prevWk = ALL_WEEKS[Math.max(0, wi-1)];
+  return getWsSite(prevWk, siteId);
+}
+
 function buildWebshopTable(cb,pb,lbl,plbl){
   var h="<div class='card'>";
   h+="<div class='chdr'><span class='ct'>Webshop Performance</span><span class='cm'>"+lbl+" &middot; Revenue &middot; ROAS &middot; CAC &middot; ITO &middot; CR%</span></div>";
@@ -634,7 +653,7 @@ function buildWebshopTable(cb,pb,lbl,plbl){
   var t_rev=0,t_spend=0,t_ord=0,t_pc2=0,p_rev=0;
 
   WEB_SITES.forEach(function(ws){
-    var r=cb[ws.id]||{}, p=pb[ws.id]||{};
+    var r=getWsSite(_cWk,ws.id), p=getWsSite(prevWk,ws.id);
     t_rev+=r.w_rev||0; t_spend+=r.w_spend||0; t_ord+=r.w_orders||0; t_pc2+=r.w_pc2||0; p_rev+=p.w_rev||0;
     h+="<tr><td class='bc'>"+rd(ragC(ww(r.w_rev,p.w_rev)))+ws.name+"</td>";
     h+="<td class='gl'>"+fM(r.w_rev)+"</td><td>"+dT(ww(r.w_rev,p.w_rev))+"</td><td>"+pgBar(r.w_tgt_cr)+"</td><td class='gr'>"+fP(r.w_pc2pct)+"</td>";
@@ -650,9 +669,9 @@ function buildWebshopTable(cb,pb,lbl,plbl){
   h+="<td class='gl'>"+fM(t_rev)+"</td><td>"+dT(ww(t_rev,p_rev))+"</td><td>-</td><td class='gr'>"+fP(t_rev?t_pc2/t_rev*100:null)+"</td>";
   h+="<td class='gl'>"+fM(t_spend)+"</td><td>"+fR(tot_roas)+"</td><td class='gr'>-</td>";
   h+="<td class='gl'>-</td><td class='gr'>-</td>";
-  var tot_users2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_users)||0);},0);
-  var tot_new2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_new_cust)||0);},0);
-  var tot_ret2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_ret_cust)||0);},0);
+  var tot_users2=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_users)||0);},0);
+  var tot_new2=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_new_cust)||0);},0);
+  var tot_ret2=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_ret_cust)||0);},0);
   h+="<td class='gl'>"+fN(t_ord)+"</td><td>-</td><td>-</td><td>-</td><td class='gr'>-</td>";
   h+="<td class='gl'>"+fN(tot_users2)+"</td><td>"+fN(tot_new2)+"</td><td class='gr'>"+fN(tot_ret2)+"</td>";
   h+="</tr></tbody></table></div></div>";
@@ -757,7 +776,7 @@ function buildRevSummary(cb,pb,t,lbl,plbl){
   h+="<div class='bx'><div class='bxh'>Webshop Revenue by Site</div>";
   h+="<table><thead><tr><th>Site</th><th>Revenue</th><th>vs "+plbl+"</th><th>vs Target</th></tr></thead><tbody>";
   WEB_SITES.forEach(function(ws){
-    var r=cb[ws.id]||{}, p=pb[ws.id]||{};
+    var r=getWsSite(_cWk,ws.id), p=getWsSite(prevWk,ws.id);
     h+="<tr><td>"+ws.name+"</td><td>"+fM(r.w_rev)+"</td><td>"+dT(ww(r.w_rev,p.w_rev))+"</td><td>"+pgBar(r.w_tgt_cr)+"</td></tr>";
   });
   h+="<tr><td>Total</td><td>"+fM(t.w_rev)+"</td><td>"+dT(ww(t.w_rev,w_rev_p))+"</td><td>-</td></tr>";
@@ -767,7 +786,7 @@ function buildRevSummary(cb,pb,t,lbl,plbl){
   h+="<div class='bx'><div class='bxh'>PC2% &amp; ROAS by Site</div>";
   h+="<table><thead><tr><th>Site</th><th>PC2%</th><th>PC2 vs Tgt</th><th>ROAS</th></tr></thead><tbody>";
   WEB_SITES.forEach(function(ws){
-    var r=cb[ws.id]||{};
+    var r=getWsSite(_cWk,ws.id);
     var pc2tgt=r.w_pc2!=null&&r.w_pc2tgt?r.w_pc2/r.w_pc2tgt*100:null;
     h+="<tr><td>"+ws.name+"</td><td>"+fP(r.w_pc2pct)+"</td><td>"+pgBar(pc2tgt)+"</td><td>"+fR(r.w_roas)+"</td></tr>";
   });
@@ -861,6 +880,17 @@ function buildBrandTable(cb,pb,t,lbl,plbl){
   return h;
 }
 
+function getWsSite(wk, siteId) {
+  if(RAW.webshop && RAW.webshop[wk] && RAW.webshop[wk][siteId]) {
+    return RAW.webshop[wk][siteId];
+  }
+  return {};
+}
+function getWsSitePrev(wi, siteId) {
+  var prevWk = ALL_WEEKS[Math.max(0, wi-1)];
+  return getWsSite(prevWk, siteId);
+}
+
 function buildWebshopTable(cb,pb,lbl,plbl){
   var h="<div class='card'>";
   h+="<div class='chdr'><span class='ct'>Webshop Performance</span><span class='cm'>"+lbl+" &middot; Revenue &middot; ROAS &middot; CAC &middot; ITO &middot; CR%</span></div>";
@@ -880,7 +910,7 @@ function buildWebshopTable(cb,pb,lbl,plbl){
   var t_rev=0,t_spend=0,t_ord=0,t_pc2=0,p_rev=0;
 
   WEB_SITES.forEach(function(ws){
-    var r=cb[ws.id]||{}, p=pb[ws.id]||{};
+    var r=getWsSite(_cWk,ws.id), p=getWsSite(prevWk,ws.id);
     t_rev+=r.w_rev||0; t_spend+=r.w_spend||0; t_ord+=r.w_orders||0; t_pc2+=r.w_pc2||0; p_rev+=p.w_rev||0;
     h+="<tr><td class='bc'>"+rd(ragC(ww(r.w_rev,p.w_rev)))+ws.name+"</td>";
     h+="<td class='gl'>"+fM(r.w_rev)+"</td><td>"+dT(ww(r.w_rev,p.w_rev))+"</td><td>"+pgBar(r.w_tgt_cr)+"</td><td class='gr'>"+fP(r.w_pc2pct)+"</td>";
@@ -896,9 +926,9 @@ function buildWebshopTable(cb,pb,lbl,plbl){
   h+="<td class='gl'>"+fM(t_rev)+"</td><td>"+dT(ww(t_rev,p_rev))+"</td><td>-</td><td class='gr'>"+fP(t_rev?t_pc2/t_rev*100:null)+"</td>";
   h+="<td class='gl'>"+fM(t_spend)+"</td><td>"+fR(tot_roas)+"</td><td class='gr'>-</td>";
   h+="<td class='gl'>-</td><td class='gr'>-</td>";
-  var tot_users2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_users)||0);},0);
-  var tot_new2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_new_cust)||0);},0);
-  var tot_ret2=WEB_SITES.reduce(function(a,ws){return a+((cb[ws.id]&&cb[ws.id].w_ret_cust)||0);},0);
+  var tot_users2=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_users)||0);},0);
+  var tot_new2=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_new_cust)||0);},0);
+  var tot_ret2=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_ret_cust)||0);},0);
   h+="<td class='gl'>"+fN(t_ord)+"</td><td>-</td><td>-</td><td>-</td><td class='gr'>-</td>";
   h+="<td class='gl'>"+fN(tot_users2)+"</td><td>"+fN(tot_new2)+"</td><td class='gr'>"+fN(tot_ret2)+"</td>";
   h+="</tr></tbody></table></div></div>";
