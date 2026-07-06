@@ -475,9 +475,9 @@ function render(){
     h+="</div>";
 
     h+="<div class='cgrid'>";
-    h+=buildRevSummary(cb,pb,t,lbl,plbl,_cWk,prevWk);
+    h+=buildRevSummary(cb,pb,t,lbl,plbl);
     h+=buildBrandTable(cb,pb,t,lbl,plbl);
-    h+=buildWebshopTable(cb,pb,lbl,plbl,_cWk,prevWk);
+    h+=buildWebshopTable(cb,pb,lbl,plbl);
     h+=buildMerch(cb,lbl);
     h+=buildHRTrend();
     h+="</div>";
@@ -501,7 +501,9 @@ function render(){
 
 // ── BUILD SECTIONS ────────────────────────────────────────
 
-function buildRevSummary(cb,pb,t,lbl,plbl,_cWk,prevWk){
+function buildRevSummary(cb,pb,t,lbl,plbl){
+  var _cWk=ALL_WEEKS[S.view==="week"?S.wi:ALL_WEEKS.length-1];
+  var prevWk=ALL_WEEKS[Math.max(0,(S.view==="week"?S.wi:ALL_WEEKS.length-1)-1)];
   var w_rev_p=BRANDS.reduce(function(a,id){return a+((pb[id]&&pb[id].w_rev)||0);},0);
   var h="<div class='card'>";
   h+="<div class='chdr'><span class='ct'>Revenue Summary</span><span class='cm'>"+lbl+"</span></div>";
@@ -634,7 +636,9 @@ function getWsSitePrev(wi, siteId) {
   return getWsSite(prevWk, siteId);
 }
 
-function buildWebshopTable(cb,pb,lbl,plbl,_cWk,prevWk){
+function buildWebshopTable(cb,pb,lbl,plbl){
+  var _cWk=ALL_WEEKS[S.view==="week"?S.wi:ALL_WEEKS.length-1];
+  var prevWk=ALL_WEEKS[Math.max(0,(S.view==="week"?S.wi:ALL_WEEKS.length-1)-1)];
   var h="<div class='card'>";
   h+="<div class='chdr'><span class='ct'>Webshop Performance</span><span class='cm'>"+lbl+" &middot; Revenue &middot; ROAS &middot; CAC &middot; ITO &middot; CR%</span></div>";
   h+="<div class='tw'><table class='W'>";
@@ -758,185 +762,6 @@ function buildMerch(cb,lbl){
   return h;
 }
 
-function buildRevSummary(cb,pb,t,lbl,plbl,_cWk,prevWk){
-  var w_rev_p=BRANDS.reduce(function(a,id){return a+((pb[id]&&pb[id].w_rev)||0);},0);
-  var h="<div class='card'>";
-  h+="<div class='chdr'><span class='ct'>Revenue Summary</span><span class='cm'>"+lbl+"</span></div>";
-  h+="<div class='bxrow'>";
-
-  // Box 1: SHEIN
-  h+="<div class='bx'><div class='bxh'>SHEIN + Platform Revenue</div>";
-  h+="<table><thead><tr><th>Channel</th><th>Revenue</th><th>vs "+plbl+"</th><th>PC2%</th></tr></thead><tbody>";
-  h+="<tr><td>SHEIN</td><td>"+fM(t.sr)+"</td><td>"+dT(ww(t.sr,t.psr))+"</td><td>"+fP(t.tpc2)+"</td></tr>";
-  h+="<tr><td>Webshop</td><td>"+fM(t.wr)+"</td><td>"+dT(ww(t.wr,t.pwr))+"</td><td>"+fP(t.wr?t.wp/t.wr*100:0)+"</td></tr>";
-  h+="<tr><td>Total</td><td>"+fM(t.sr+t.wr)+"</td><td>"+dT(ww(t.sr+t.wr,t.psr+t.pwr))+"</td><td>"+fP((t.sr+t.wr)?(t.sp+t.wp)/(t.sr+t.wr)*100:0)+"</td></tr>";
-  h+="</tbody></table></div>";
-
-  // Box 2: Webshop by site
-  h+="<div class='bx'><div class='bxh'>Webshop Revenue by Site</div>";
-  h+="<table><thead><tr><th>Site</th><th>Revenue</th><th>vs "+plbl+"</th><th>vs Target</th></tr></thead><tbody>";
-  WEB_SITES.forEach(function(ws){
-    var r=getWsSite(_cWk,ws.id), p=getWsSite(prevWk,ws.id);
-    h+="<tr><td>"+ws.name+"</td><td>"+fM(r.w_rev)+"</td><td>"+dT(ww(r.w_rev,p.w_rev))+"</td><td>"+pgBar(r.w_tgt_cr)+"</td></tr>";
-  });
-  h+="<tr><td>Total</td><td>"+fM(t.w_rev)+"</td><td>"+dT(ww(t.w_rev,w_rev_p))+"</td><td>-</td></tr>";
-  h+="</tbody></table></div>";
-
-  // Box 3: PC2 + ROAS
-  h+="<div class='bx'><div class='bxh'>PC2% &amp; ROAS by Site</div>";
-  h+="<table><thead><tr><th>Site</th><th>PC2%</th><th>PC2 vs Tgt</th><th>ROAS</th></tr></thead><tbody>";
-  WEB_SITES.forEach(function(ws){
-    var r=getWsSite(_cWk,ws.id);
-    var pc2tgt=r.w_pc2!=null&&r.w_pc2tgt?r.w_pc2/r.w_pc2tgt*100:null;
-    h+="<tr><td>"+ws.name+"</td><td>"+fP(r.w_pc2pct)+"</td><td>"+pgBar(pc2tgt)+"</td><td>"+fR(r.w_roas)+"</td></tr>";
-  });
-  h+="<tr><td>Portfolio</td><td>"+fP(t.w_rev?t.w_pc2/t.w_rev*100:null)+"</td><td>-</td><td>"+fR(t.web_roas)+"</td></tr>";
-  h+="</tbody></table></div>";
-
-  h+="</div></div>";
-  return h;
-}
-
-function buildBrandTable(cb,pb,t,lbl,plbl){
-  var h="<div class='card'>";
-  h+="<div class='chdr'><span class='ct'>SHEIN + Platform - Brand Performance</span><span class='cm'>"+lbl+"</span></div>";
-  h+="<div class='tw'><table class='W'>";
-  h+="<thead><tr><th class='bc' rowspan='2'>Brand</th>";
-  h+="<th class='gh' colspan='3'>SHEIN</th>";
-  h+="<th class='gh' colspan='2'>Platform</th>";
-  h+="<th class='gh' colspan='2'>Combined</th></tr>";
-  h+="<tr><th class='gl'>Revenue</th><th>vs "+plbl+"</th><th class='gr'>PC2%</th>";
-  h+="<th class='gl'>Revenue</th><th class='gr'>vs "+plbl+"</th>";
-  h+="<th>Revenue</th><th>vs "+plbl+"</th></tr></thead><tbody>";
-
-  var grandSR=0,grandSP=0,grandWR=0,grandWP=0,grandPSR=0,grandPWR=0;
-
-  function brandRow(id, label, indent, r, p) {
-    var sw=ww(r.sr,p.sr);
-    var indCls = indent ? " ind" : "";
-    var out="<tr><td class='bc"+indCls+"'>"+rd(ragC(sw))+label+"</td>";
-    out+="<td class='gl'>"+fM(r.sr)+"</td><td>"+dT(sw)+"</td><td class='gr'>"+fP(r.spp)+"</td>";
-    out+="<td class='gl'>"+fM(r.wr)+"</td><td class='gr'>"+dT(ww(r.wr,p.wr))+"</td>";
-    out+="<td>"+fM((r.sr||0)+(r.wr||0))+"</td><td>"+dT(ww((r.sr||0)+(r.wr||0),(p.sr||0)+(p.wr||0)))+"</td></tr>";
-    return out;
-  }
-  function subtotalRow(label, sr, sp, wr, wp, psr2, pwr2, cls) {
-    cls = cls || "sub";
-    var out="<tr class='"+cls+"'><td class='bc'>"+label+"</td>";
-    out+="<td class='gl'>"+fM(sr)+"</td><td>"+dT(ww(sr,psr2))+"</td><td class='gr'>"+fP(sr?sp/sr*100:0)+"</td>";
-    out+="<td class='gl'>"+fM(wr)+"</td><td class='gr'>"+dT(ww(wr,pwr2))+"</td>";
-    out+="<td>"+fM(sr+wr)+"</td><td>"+dT(ww(sr+wr,psr2+pwr2))+"</td></tr>";
-    return out;
-  }
-  function sumIds(ids, src) {
-    var sr=0,sp=0,wr=0,wp=0;
-    ids.forEach(function(id){ var r=src[id]||{}; sr+=r.sr||0;sp+=r.sp||0;wr+=r.wr||0;wp+=r.wp||0; });
-    return {sr:sr,sp:sp,wr:wr,wp:wp};
-  }
-
-  // ── MISSGUIDED GROUP ──────────────────────────────────────
-  var msgIds = ["MISSGUIDED","MISSGUIDED - Playboy"];
-  var msgLabels = {"MISSGUIDED":"Missguided","MISSGUIDED - Playboy":"Playboy x MSG"};
-  msgIds.forEach(function(id){ h+=brandRow(id, msgLabels[id], true, cb[id]||{}, pb[id]||{}); });
-  var msgC=sumIds(msgIds,cb), msgP=sumIds(msgIds,pb);
-  h+=subtotalRow("Missguided Total", msgC.sr,msgC.sp,msgC.wr,msgC.wp,msgP.sr,msgP.wr);
-  grandSR+=msgC.sr;grandSP+=msgC.sp;grandWR+=msgC.wr;grandWP+=msgC.wp;grandPSR+=msgP.sr;grandPWR+=msgP.wr;
-
-  // ── SUMWON MEN SUB-GROUP ──────────────────────────────────
-  var smenIds = ["SUMWON - Men","SUMWON - Playboy"];
-  var smenLabels = {"SUMWON - Men":"Sumwon Men","SUMWON - Playboy":"Playboy x SWM"};
-  smenIds.forEach(function(id){ h+=brandRow(id, smenLabels[id], true, cb[id]||{}, pb[id]||{}); });
-  var smenC=sumIds(smenIds,cb), smenP=sumIds(smenIds,pb);
-  h+=subtotalRow("Sumwon Men Total", smenC.sr,smenC.sp,smenC.wr,smenC.wp,smenP.sr,smenP.wr);
-
-  // Sumwon Women + Kids as individual rows
-  var swIds = ["SUMWON - Women","SUMWON - Kids"];
-  var swLabels = {"SUMWON - Women":"Sumwon Women","SUMWON - Kids":"Sumwon Kids"};
-  swIds.forEach(function(id){ h+=brandRow(id, swLabels[id], true, cb[id]||{}, pb[id]||{}); });
-
-  // Sumwon Total = Men Total + Women + Kids
-  var sumwonAllIds = smenIds.concat(swIds);
-  var sumwonC=sumIds(sumwonAllIds,cb), sumwonP=sumIds(sumwonAllIds,pb);
-  h+=subtotalRow("Sumwon Total", sumwonC.sr,sumwonC.sp,sumwonC.wr,sumwonC.wp,sumwonP.sr,sumwonP.wr);
-  grandSR+=sumwonC.sr;grandSP+=sumwonC.sp;grandWR+=sumwonC.wr;grandWP+=sumwonC.wp;grandPSR+=sumwonP.sr;grandPWR+=sumwonP.wr;
-
-  // ── INDIVIDUAL BRANDS ────────────────────────────────────
-  var indivBrands = [
-    {id:"AiiRZ",   lbl:"AiiRZ"},
-    {id:"BABYPHAT",lbl:"Baby Phat"},
-    {id:"KIZN",    lbl:"KIZN"},
-    {id:"KSTM",    lbl:"KSTM"}
-  ];
-  indivBrands.forEach(function(b){
-    var r=cb[b.id]||{},p=pb[b.id]||{};
-    grandSR+=r.sr||0;grandSP+=r.sp||0;grandWR+=r.wr||0;grandWP+=r.wp||0;grandPSR+=p.sr||0;grandPWR+=p.wr||0;
-    h+=subtotalRow(rd(ragC(ww(r.sr,p.sr)))+b.lbl, r.sr,r.sp,r.wr,r.wp,p.sr,p.wr);
-  });
-
-  // ── PORTFOLIO TOTAL ──────────────────────────────────────
-  h+=subtotalRow("Portfolio Total",grandSR,grandSP,grandWR,grandWP,grandPSR,grandPWR,"tot");
-
-  h+="</tbody></table></div></div>";
-  return h;
-}
-
-function getWsSite(wk, siteId) {
-  if(RAW.webshop && RAW.webshop[wk] && RAW.webshop[wk][siteId]) {
-    return RAW.webshop[wk][siteId];
-  }
-  return {};
-}
-function getWsSitePrev(wi, siteId) {
-  var prevWk = ALL_WEEKS[Math.max(0, wi-1)];
-  return getWsSite(prevWk, siteId);
-}
-
-function buildWebshopTable(cb,pb,lbl,plbl,_cWk,prevWk){
-  var h="<div class='card'>";
-  h+="<div class='chdr'><span class='ct'>Webshop Performance</span><span class='cm'>"+lbl+" &middot; Revenue &middot; ROAS &middot; CAC &middot; ITO &middot; CR%</span></div>";
-  h+="<div class='tw'><table class='W'>";
-  h+="<thead><tr><th class='bc' rowspan='2'>Site</th>";
-  h+="<th class='gh' colspan='4'>Revenue</th>";
-  h+="<th class='gh' colspan='3'>Marketing Efficiency</th>";
-  h+="<th class='gh' colspan='2'>Acquisition</th>";
-  h+="<th class='gh' colspan='5'>Trading Metrics</th>";
-  h+="<th class='gh' colspan='3'>Customers</th></tr>";
-  h+="<tr><th class='gl'>Revenue</th><th>vs "+plbl+"</th><th>vs Target</th><th class='gr'>PC2%</th>";
-  h+="<th class='gl'>Spend</th><th>ROAS (BR)</th><th class='gr'>ROAS (AR)</th>";
-  h+="<th class='gl'>CAC</th><th class='gr'>CAC (DM)</th>";
-  h+="<th class='gl'>Orders</th><th>AOV</th><th>ITO</th><th>CR%</th><th class='gr'>TDR%</th>";
-  h+="<th class='gl'>Active Cust.</th><th>New Cust.</th><th class='gr'>Returning</th></tr></thead><tbody>";
-
-  var t_rev=0,t_spend=0,t_ord=0,t_pc2=0,p_rev=0;
-
-  WEB_SITES.forEach(function(ws){
-    var r=getWsSite(_cWk,ws.id), p=getWsSite(prevWk,ws.id);
-    t_rev+=r.w_rev||0; t_spend+=r.w_spend||0; t_ord+=r.w_orders||0; t_pc2+=r.w_pc2||0; p_rev+=p.w_rev||0;
-    h+="<tr><td class='bc'>"+rd(ragC(ww(r.w_rev,p.w_rev)))+ws.name+"</td>";
-    h+="<td class='gl'>"+fM(r.w_rev)+"</td><td>"+dT(ww(r.w_rev,p.w_rev))+"</td><td>"+pgBar(r.w_tgt_cr)+"</td><td class='gr'>"+fP(r.w_pc2pct)+"</td>";
-    h+="<td class='gl'>"+fM(r.w_spend)+"</td><td>"+fR(r.w_roas)+"</td><td class='gr'>"+fR(r.w_roas_ar)+"</td>";
-    h+="<td class='gl'>"+fX(r.w_cac)+"</td><td class='gr'>"+fX(r.w_cac_dm)+"</td>";
-    h+="<td class='gl'>"+fN(r.w_orders)+"</td><td>"+fX(r.w_aov)+"</td><td>"+(r.w_ito!=null?r.w_ito.toFixed(1)+"x":"-")+"</td><td>"+fP(r.w_cr)+"</td><td class='gr'>"+fP(r.w_tdr)+"</td>";
-    h+="<td class='gl'>"+fN(r.w_users)+"</td><td>"+fN(r.w_new_cust)+"</td><td class='gr'>"+fN(r.w_ret_cust)+"</td>";
-    h+="</tr>";
-  });
-
-  var tot_roas=t_spend?t_rev/t_spend:null;
-  h+="<tr class='tot'><td class='bc'>Total Webshop</td>";
-  h+="<td class='gl'>"+fM(t_rev)+"</td><td>"+dT(ww(t_rev,p_rev))+"</td><td>-</td><td class='gr'>"+fP(t_rev?t_pc2/t_rev*100:null)+"</td>";
-  h+="<td class='gl'>"+fM(t_spend)+"</td><td>"+fR(tot_roas)+"</td><td class='gr'>-</td>";
-  h+="<td class='gl'>-</td><td class='gr'>-</td>";
-  var tot_users2=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_users)||0);},0);
-  var tot_new2=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_new_cust)||0);},0);
-  var tot_ret2=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_ret_cust)||0);},0);
-  h+="<td class='gl'>"+fN(t_ord)+"</td><td>-</td><td>-</td><td>-</td><td class='gr'>-</td>";
-  h+="<td class='gl'>"+fN(tot_users2)+"</td><td>"+fN(tot_new2)+"</td><td class='gr'>"+fN(tot_ret2)+"</td>";
-  h+="</tr></tbody></table></div></div>";
-  return h;
-}
-
-
-// ── HIT RATE TREND TABLE ─────────────────────────────────
 function buildHRTrend(){
   // Get last 4 weeks that have hit rate data
   var hrWeeks = ALL_WEEKS.filter(function(w){
