@@ -430,7 +430,7 @@ function render(){
     h+="<div class='kpi hl'><div class='kl'>Total Revenue</div><div class='kv'>"+fM(t.sr+t.wr)+"</div><div class='ks'>"+bdg(ww(t.sr+t.wr,t.psr+t.pwr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>SHEIN Revenue</div><div class='kv'>"+fM(t.sr)+"</div><div class='ks'>"+bdg(ww(t.sr,t.psr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(t.wr)+"</div><div class='ks'>"+bdg(ww(t.wr,t.pwr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
-    var _cWk=ALL_WEEKS[S.view==="week"?S.wi:ALL_WEEKS.length-1];
+    // _cWk already defined above
     var totOrders=WEB_SITES.reduce(function(a,ws){var r=getWsSite(_cWk,ws.id);return a+(r.w_orders||0);},0);
     var totNew=WEB_SITES.reduce(function(a,ws){var r=getWsSite(_cWk,ws.id);return a+(r.w_new_cust||0);},0);
     var totRet=WEB_SITES.reduce(function(a,ws){var r=getWsSite(_cWk,ws.id);return a+(r.w_ret_cust||0);},0);
@@ -475,9 +475,9 @@ function render(){
     h+="</div>";
 
     h+="<div class='cgrid'>";
-    h+=buildRevSummary(cb,pb,t,lbl,plbl);
+    h+=buildRevSummary(cb,pb,t,lbl,plbl,_cWk,prevWk);
     h+=buildBrandTable(cb,pb,t,lbl,plbl);
-    h+=buildWebshopTable(cb,pb,lbl,plbl);
+    h+=buildWebshopTable(cb,pb,lbl,plbl,_cWk,prevWk);
     h+=buildMerch(cb,lbl);
     h+=buildHRTrend();
     h+="</div>";
@@ -501,7 +501,7 @@ function render(){
 
 // ── BUILD SECTIONS ────────────────────────────────────────
 
-function buildRevSummary(cb,pb,t,lbl,plbl){
+function buildRevSummary(cb,pb,t,lbl,plbl,_cWk,prevWk){
   var w_rev_p=BRANDS.reduce(function(a,id){return a+((pb[id]&&pb[id].w_rev)||0);},0);
   var h="<div class='card'>";
   h+="<div class='chdr'><span class='ct'>Revenue Summary</span><span class='cm'>"+lbl+"</span></div>";
@@ -634,7 +634,7 @@ function getWsSitePrev(wi, siteId) {
   return getWsSite(prevWk, siteId);
 }
 
-function buildWebshopTable(cb,pb,lbl,plbl){
+function buildWebshopTable(cb,pb,lbl,plbl,_cWk,prevWk){
   var h="<div class='card'>";
   h+="<div class='chdr'><span class='ct'>Webshop Performance</span><span class='cm'>"+lbl+" &middot; Revenue &middot; ROAS &middot; CAC &middot; ITO &middot; CR%</span></div>";
   h+="<div class='tw'><table class='W'>";
@@ -758,7 +758,7 @@ function buildMerch(cb,lbl){
   return h;
 }
 
-function buildRevSummary(cb,pb,t,lbl,plbl){
+function buildRevSummary(cb,pb,t,lbl,plbl,_cWk,prevWk){
   var w_rev_p=BRANDS.reduce(function(a,id){return a+((pb[id]&&pb[id].w_rev)||0);},0);
   var h="<div class='card'>";
   h+="<div class='chdr'><span class='ct'>Revenue Summary</span><span class='cm'>"+lbl+"</span></div>";
@@ -891,7 +891,7 @@ function getWsSitePrev(wi, siteId) {
   return getWsSite(prevWk, siteId);
 }
 
-function buildWebshopTable(cb,pb,lbl,plbl){
+function buildWebshopTable(cb,pb,lbl,plbl,_cWk,prevWk){
   var h="<div class='card'>";
   h+="<div class='chdr'><span class='ct'>Webshop Performance</span><span class='cm'>"+lbl+" &middot; Revenue &middot; ROAS &middot; CAC &middot; ITO &middot; CR%</span></div>";
   h+="<div class='tw'><table class='W'>";
