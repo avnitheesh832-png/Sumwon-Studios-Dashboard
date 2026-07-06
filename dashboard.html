@@ -1028,7 +1028,28 @@ document.getElementById("btn-pdf").addEventListener("click", function(){
   setTimeout(function(){ window.print(); }, 400);
 });
 document.getElementById("btn-send").addEventListener("click", function(){
-  toast("\u2713 Scorecard sent to CEO");
+  var btn = document.getElementById("btn-send");
+  btn.textContent = "Sending...";
+  btn.disabled = true;
+  var weeks = ALL_WEEKS;
+  var wkLabel = weeks.length ? wkLbl(weeks[weeks.length-1]) : "Latest";
+  fetch("/api/send", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({week_label: wkLabel})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    btn.innerHTML = "<svg width=\"11\" height=\"11\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"22\" y1=\"2\" x2=\"11\" y2=\"13\"/><polygon points=\"22 2 15 22 11 13 2 9 22 2\"/></svg> Send to CEO";
+    btn.disabled = false;
+    if(d.error) toast("Error: "+d.error);
+    else toast("\u2713 "+d.message);
+  })
+  .catch(function(e){
+    btn.innerHTML = "<svg width=\"11\" height=\"11\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"22\" y1=\"2\" x2=\"11\" y2=\"13\"/><polygon points=\"22 2 15 22 11 13 2 9 22 2\"/></svg> Send to CEO";
+    btn.disabled = false;
+    toast("Send failed: "+e.message);
+  });
 });
 
 // Init
