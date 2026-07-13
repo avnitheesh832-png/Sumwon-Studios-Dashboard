@@ -506,6 +506,8 @@ function render(){
 function buildRevSummary(cb,pb,t,lbl,plbl){
   var _cWk=ALL_WEEKS[S.view==="week"?S.wi:ALL_WEEKS.length-1];
   var prevWk=ALL_WEEKS[Math.max(0,(S.view==="week"?S.wi:ALL_WEEKS.length-1)-1)];
+  var webRev=getWsTotal(_cWk,"w_rev");
+  var webRevPrev=getWsTotal(prevWk,"w_rev");
   var w_rev_p=BRANDS.reduce(function(a,id){return a+((pb[id]&&pb[id].w_rev)||0);},0);
   var h="<div class='card'>";
   h+="<div class='chdr'><span class='ct'>Revenue Summary</span><span class='cm'>"+lbl+"</span></div>";
@@ -638,6 +640,8 @@ function getWsTotal(wk, field) {
 }
 function getWsTotalPrev(wi, field) {
   var prevWk = ALL_WEEKS[Math.max(0, wi-1)];
+  var webRev=getWsTotal(_cWk,"w_rev");
+  var webRevPrev=getWsTotal(prevWk,"w_rev");
   return getWsTotal(prevWk, field);
 }
 
