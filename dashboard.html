@@ -425,11 +425,13 @@ function render(){
     var h="";
 
     // TOTAL PERFORMANCE KPIs
+    var webRev = getWsTotal(_cWk, "w_rev");
+    var webRevPrev = getWsTotal(prevWk, "w_rev");
     h+="<div class='slbl'>Total Performance (SHEIN + Webshop)</div>";
     h+="<div class='krow krow5'>";
-    h+="<div class='kpi hl'><div class='kl'>Total Revenue</div><div class='kv'>"+fM(t.sr+t.wr)+"</div><div class='ks'>"+bdg(ww(t.sr+t.wr,t.psr+t.pwr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
+    h+="<div class='kpi hl'><div class='kl'>Total Revenue</div><div class='kv'>"+fM(t.sr+webRev)+"</div><div class='ks'>"+bdg(ww(t.sr+webRev,t.psr+webRevPrev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>SHEIN Revenue</div><div class='kv'>"+fM(t.sr)+"</div><div class='ks'>"+bdg(ww(t.sr,t.psr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
-    h+="<div class='kpi'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(t.wr)+"</div><div class='ks'>"+bdg(ww(t.wr,t.pwr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(webRev)+"</div><div class='ks'>"+bdg(ww(webRev,webRevPrev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
     // _cWk already defined above
     var totOrders=WEB_SITES.reduce(function(a,ws){var r=getWsSite(_cWk,ws.id);return a+(r.w_orders||0);},0);
     var totNew=WEB_SITES.reduce(function(a,ws){var r=getWsSite(_cWk,ws.id);return a+(r.w_new_cust||0);},0);
@@ -465,7 +467,7 @@ function render(){
     var tot_orders_web=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_orders)||0);},0);
     h+="<div class='slbl'>Webshop Performance</div>";
     h+="<div class='krow krow6'>";
-    h+="<div class='kpi hl'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(t.wr)+"</div><div class='ks'>"+bdg(ww(t.wr,t.pwr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
+    h+="<div class='kpi hl'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(webRev)+"</div><div class='ks'>"+bdg(ww(webRev,webRevPrev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>Orders</div><div class='kv'>"+fN(tot_orders_web)+"</div><div class='ks'><span class='fl'>All webshop sites</span></div></div>";
     h+="<div class='kpi'><div class='kl'>Marketing Spend</div><div class='kv'>"+fM(t.w_spend)+"</div><div class='ks'><span class='fl'>All sites</span></div></div>";
     h+="<div class='kpi'><div class='kl'>ROAS</div><div class='kv'>"+(t.web_roas!=null?fR(t.web_roas):"-")+"</div><div class='ks'><span class='fl'>Revenue / Spend</span></div></div>";
@@ -513,8 +515,8 @@ function buildRevSummary(cb,pb,t,lbl,plbl){
   h+="<div class='bx'><div class='bxh'>SHEIN + Platform Revenue</div>";
   h+="<table><thead><tr><th>Channel</th><th>Revenue</th><th>vs "+plbl+"</th><th>PC2%</th></tr></thead><tbody>";
   h+="<tr><td>SHEIN</td><td>"+fM(t.sr)+"</td><td>"+dT(ww(t.sr,t.psr))+"</td><td>"+fP(t.tpc2)+"</td></tr>";
-  h+="<tr><td>Webshop</td><td>"+fM(t.wr)+"</td><td>"+dT(ww(t.wr,t.pwr))+"</td><td>"+fP(t.wr?t.wp/t.wr*100:0)+"</td></tr>";
-  h+="<tr><td>Total</td><td>"+fM(t.sr+t.wr)+"</td><td>"+dT(ww(t.sr+t.wr,t.psr+t.pwr))+"</td><td>"+fP((t.sr+t.wr)?(t.sp+t.wp)/(t.sr+t.wr)*100:0)+"</td></tr>";
+  h+="<tr><td>Webshop</td><td>"+fM(webRev)+"</td><td>"+dT(ww(webRev,webRevPrev))+"</td><td>"+fP(t.wr?t.wp/t.wr*100:0)+"</td></tr>";
+  h+="<tr><td>Total</td><td>"+fM(totalRev)+"</td><td>"+dT(ww(totalRev,totalRevPrev))+"</td><td>"+fP(totalPC2)+"</td></tr>";
   h+="</tbody></table></div>";
 
   // Box 2: Webshop by site
@@ -619,10 +621,24 @@ function buildBrandTable(cb,pb,t,lbl,plbl){
   });
 
   // ── PORTFOLIO TOTAL ──────────────────────────────────────
-  h+=subtotalRow("Portfolio Total",grandSR,grandSP,grandWR,grandWP,grandPSR,grandPWR,"tot");
+  h+=subtotalRow("Portfolio Total",grandSR,grandSP,Math.round(webRev),0,grandPSR,Math.round(webRevPrev),"tot");
 
   h+="</tbody></table></div></div>";
   return h;
+}
+
+function getWsTotal(wk, field) {
+  if(!RAW.webshop || !RAW.webshop[wk]) return 0;
+  var total = 0;
+  WEB_SITES.forEach(function(ws){
+    var site = RAW.webshop[wk][ws.id] || {};
+    total += site[field] || 0;
+  });
+  return total;
+}
+function getWsTotalPrev(wi, field) {
+  var prevWk = ALL_WEEKS[Math.max(0, wi-1)];
+  return getWsTotal(prevWk, field);
 }
 
 function getWsSite(wk, siteId) {
