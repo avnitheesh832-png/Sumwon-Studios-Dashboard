@@ -633,7 +633,7 @@ function buildBrandTable(cb,pb,t,lbl,plbl){
   });
 
   // ── PORTFOLIO TOTAL ──────────────────────────────────────
-  h+=subtotalRow("Portfolio Total",grandSR,grandSP,Math.round(webRev),0,grandPSR,Math.round(webRevPrev),"tot");
+  h+=subtotalRow("Portfolio Total",grandSR,grandSP,Math.round(t.webRev||0),0,grandPSR,Math.round(t.webRevPrev||0),"tot");
 
   h+="</tbody></table></div></div>";
   return h;
