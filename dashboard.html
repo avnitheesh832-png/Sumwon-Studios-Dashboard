@@ -404,6 +404,8 @@ function calcTotals(cb,pb){
   t.tpc2=t.sr?t.sp/t.sr*100:0; t.ppc2=t.psr?t.ppsp/t.psr*100:0;
   t.web_roas=t.w_spend?t.w_rev/t.w_spend:null;
   t.phr=t.hrc?t.hrs/t.hrc:null;
+  // webshop CSV revenue - set after data loads via setTotalsWebRev()
+  t.webRev=0; t.webRevPrev=0; t.totalRev=t.sr; t.totalRevPrev=t.psr; t.totalPC2=t.tpc2;
   return t;
 }
 
@@ -412,6 +414,11 @@ function render(){
   try {
     var v=getView(), t=calcTotals(v.cb,v.pb);
     var _cWk=v.cw, prevWk=v.pw;
+    t.webRev=getWsTotal(_cWk,"w_rev");
+    t.webRevPrev=getWsTotal(prevWk,"w_rev");
+    t.totalRev=t.sr+t.webRev;
+    t.totalRevPrev=t.psr+t.webRevPrev;
+    t.totalPC2=t.totalRev?(t.sp)/t.totalRev*100:0;
     var cb=v.cb, pb=v.pb, lbl=v.lbl, plbl=v.plbl;
 
     document.getElementById("ph-wk").textContent=lbl;
@@ -429,9 +436,9 @@ function render(){
     var webRevPrev = getWsTotal(prevWk, "w_rev");
     h+="<div class='slbl'>Total Performance (SHEIN + Webshop)</div>";
     h+="<div class='krow krow5'>";
-    h+="<div class='kpi hl'><div class='kl'>Total Revenue</div><div class='kv'>"+fM(t.sr+webRev)+"</div><div class='ks'>"+bdg(ww(t.sr+webRev,t.psr+webRevPrev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
+    h+="<div class='kpi hl'><div class='kl'>Total Revenue</div><div class='kv'>"+fM(t.totalRev)+"</div><div class='ks'>"+bdg(ww(t.totalRev,t.totalRevPrev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>SHEIN Revenue</div><div class='kv'>"+fM(t.sr)+"</div><div class='ks'>"+bdg(ww(t.sr,t.psr))+"<span class='fl'>vs "+plbl+"</span></div></div>";
-    h+="<div class='kpi'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(webRev)+"</div><div class='ks'>"+bdg(ww(webRev,webRevPrev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
+    h+="<div class='kpi'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(t.webRev)+"</div><div class='ks'>"+bdg(ww(t.webRev,t.webRevPrev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
     // _cWk already defined above
     var totOrders=WEB_SITES.reduce(function(a,ws){var r=getWsSite(_cWk,ws.id);return a+(r.w_orders||0);},0);
     var totNew=WEB_SITES.reduce(function(a,ws){var r=getWsSite(_cWk,ws.id);return a+(r.w_new_cust||0);},0);
@@ -467,7 +474,7 @@ function render(){
     var tot_orders_web=WEB_SITES.reduce(function(a,ws){return a+((getWsSite(_cWk,ws.id)&&getWsSite(_cWk,ws.id).w_orders)||0);},0);
     h+="<div class='slbl'>Webshop Performance</div>";
     h+="<div class='krow krow6'>";
-    h+="<div class='kpi hl'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(webRev)+"</div><div class='ks'>"+bdg(ww(webRev,webRevPrev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
+    h+="<div class='kpi hl'><div class='kl'>Webshop Revenue</div><div class='kv'>"+fM(t.webRev)+"</div><div class='ks'>"+bdg(ww(t.webRev,t.webRevPrev))+"<span class='fl'>vs "+plbl+"</span></div></div>";
     h+="<div class='kpi'><div class='kl'>Orders</div><div class='kv'>"+fN(tot_orders_web)+"</div><div class='ks'><span class='fl'>All webshop sites</span></div></div>";
     h+="<div class='kpi'><div class='kl'>Marketing Spend</div><div class='kv'>"+fM(t.w_spend)+"</div><div class='ks'><span class='fl'>All sites</span></div></div>";
     h+="<div class='kpi'><div class='kl'>ROAS</div><div class='kv'>"+(t.web_roas!=null?fR(t.web_roas):"-")+"</div><div class='ks'><span class='fl'>Revenue / Spend</span></div></div>";
@@ -506,11 +513,11 @@ function render(){
 function buildRevSummary(cb,pb,t,lbl,plbl){
   var _cWk=ALL_WEEKS[S.view==="week"?S.wi:ALL_WEEKS.length-1];
   var prevWk=ALL_WEEKS[Math.max(0,(S.view==="week"?S.wi:ALL_WEEKS.length-1)-1)];
-  var webRev=getWsTotal(_cWk,"w_rev");
-  var webRevPrev=getWsTotal(prevWk,"w_rev");
-  var totalRev=t.sr+webRev;
-  var totalRevPrev=t.psr+webRevPrev;
-  var totalPC2=totalRev?(t.sp)/totalRev*100:0;
+  var webRev=t.webRev||getWsTotal(_cWk,"w_rev");
+  var webRevPrev=t.webRevPrev||getWsTotal(prevWk,"w_rev");
+  var totalRev=t.totalRev||(t.sr+webRev);
+  var totalRevPrev=t.totalRevPrev||(t.psr+webRevPrev);
+  var totalPC2=t.totalPC2||(totalRev?(t.sp)/totalRev*100:0);
   var w_rev_p=BRANDS.reduce(function(a,id){return a+((pb[id]&&pb[id].w_rev)||0);},0);
   var h="<div class='card'>";
   h+="<div class='chdr'><span class='ct'>Revenue Summary</span><span class='cm'>"+lbl+"</span></div>";
