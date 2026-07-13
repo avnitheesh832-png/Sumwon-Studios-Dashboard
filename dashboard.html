@@ -508,6 +508,9 @@ function buildRevSummary(cb,pb,t,lbl,plbl){
   var prevWk=ALL_WEEKS[Math.max(0,(S.view==="week"?S.wi:ALL_WEEKS.length-1)-1)];
   var webRev=getWsTotal(_cWk,"w_rev");
   var webRevPrev=getWsTotal(prevWk,"w_rev");
+  var totalRev=t.sr+webRev;
+  var totalRevPrev=t.psr+webRevPrev;
+  var totalPC2=totalRev?(t.sp)/totalRev*100:0;
   var w_rev_p=BRANDS.reduce(function(a,id){return a+((pb[id]&&pb[id].w_rev)||0);},0);
   var h="<div class='card'>";
   h+="<div class='chdr'><span class='ct'>Revenue Summary</span><span class='cm'>"+lbl+"</span></div>";
@@ -517,7 +520,7 @@ function buildRevSummary(cb,pb,t,lbl,plbl){
   h+="<div class='bx'><div class='bxh'>SHEIN + Platform Revenue</div>";
   h+="<table><thead><tr><th>Channel</th><th>Revenue</th><th>vs "+plbl+"</th><th>PC2%</th></tr></thead><tbody>";
   h+="<tr><td>SHEIN</td><td>"+fM(t.sr)+"</td><td>"+dT(ww(t.sr,t.psr))+"</td><td>"+fP(t.tpc2)+"</td></tr>";
-  h+="<tr><td>Webshop</td><td>"+fM(webRev)+"</td><td>"+dT(ww(webRev,webRevPrev))+"</td><td>"+fP(t.wr?t.wp/t.wr*100:0)+"</td></tr>";
+  h+="<tr><td>Webshop</td><td>"+fM(webRev)+"</td><td>"+dT(ww(webRev,webRevPrev))+"</td><td>"+fP(webRev?getWsTotal(_cWk,"w_pc2")/webRev*100:0)+"</td></tr>";
   h+="<tr><td>Total</td><td>"+fM(totalRev)+"</td><td>"+dT(ww(totalRev,totalRevPrev))+"</td><td>"+fP(totalPC2)+"</td></tr>";
   h+="</tbody></table></div>";
 
@@ -528,7 +531,7 @@ function buildRevSummary(cb,pb,t,lbl,plbl){
     var r=getWsSite(_cWk,ws.id), p=getWsSite(prevWk,ws.id);
     h+="<tr><td>"+ws.name+"</td><td>"+fM(r.w_rev)+"</td><td>"+dT(ww(r.w_rev,p.w_rev))+"</td><td>"+pgBar(r.w_tgt_cr)+"</td></tr>";
   });
-  h+="<tr><td>Total</td><td>"+fM(t.w_rev)+"</td><td>"+dT(ww(t.w_rev,w_rev_p))+"</td><td>-</td></tr>";
+  h+="<tr><td>Total</td><td>"+fM(webRev)+"</td><td>"+dT(ww(webRev,webRevPrev))+"</td><td>-</td></tr>";
   h+="</tbody></table></div>";
 
   // Box 3: PC2 + ROAS
